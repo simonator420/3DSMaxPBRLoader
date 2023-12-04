@@ -29,6 +29,21 @@ rollout ReawoteMatLoader title
 	
 	-- Button for loading materials
 	button btnLoadMaterials "Load selected materials" pos:[5, 175] width:fullWidthElement enabled:false
+	
+	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 215] width:fullWidthElement height:100
+	
+	on ReawoteMatLoader open do
+    (
+        -- Configuration for the ListView
+        lvItems.View = lvItems.View.Details
+        lvItems.CheckBoxes = true
+        lvItems.FullRowSelect = true
+        lvItems.GridLines = true
+
+        -- Adding columns
+        lvItems.columns.add("Check")
+		lvItems.columns.add("Name")
+    )
 
     -- Event handler for the Browse button
     on btnBrowse pressed do
@@ -48,6 +63,11 @@ rollout ReawoteMatLoader title
 			load16Disp.enabled = true
 			btnLoadMaterials.enabled = true
 			
+			local item = dotNetObject "System.Windows.Forms.ListViewItem" ""
+			item.Checked = false
+			item.SubItems.Add("Ready")  -- Name of the material
+			lvItems.Items.Add(item)
+			
         )
     )
 	
@@ -60,4 +80,4 @@ rollout ReawoteMatLoader title
 )
 
 -- Display the rollout
-createdialog ReawoteMatLoader width:390 height:220
+createdialog ReawoteMatLoader width:390 height:320
