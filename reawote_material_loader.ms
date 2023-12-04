@@ -30,7 +30,13 @@ rollout ReawoteMatLoader title
 	-- Button for loading materials
 	button btnLoadMaterials "Load selected materials" pos:[5, 175] width:fullWidthElement enabled:false
 	
-	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 215] width:fullWidthElement height:100
+	button btnSelectAll "Select All" pos:[5, 205] width:buttonWidth enabled:false
+	button btnRefresh "Refresh" pos:[90, 205] width:buttonWidth enabled:false
+	button btnAddToQueue "Add To Queue" pos:[175, 205] width:buttonWidth enabled:false
+	button btnClean "Clean" pos:[260, 205] width:buttonWidth enabled:false
+
+	
+	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:150
 	
 	on ReawoteMatLoader open do
     (
@@ -40,9 +46,12 @@ rollout ReawoteMatLoader title
         lvItems.FullRowSelect = true
         lvItems.GridLines = true
 
-        -- Adding columns
-        lvItems.columns.add("Check")
-		lvItems.columns.add("Name")
+        local checkColumnWidth = 50 -- Width for the "Check" column
+		local nameColumnWidth = 320 -- Width for the "Name" column
+
+		lvItems.columns.add("Check") checkColumnWidth
+		lvItems.columns.add("Name") nameColumnWidth
+
     )
 
     -- Event handler for the Browse button
@@ -62,12 +71,29 @@ rollout ReawoteMatLoader title
 			load16Nrm.enabled = true
 			load16Disp.enabled = true
 			btnLoadMaterials.enabled = true
+			btnSelectAll.enabled = true
+			btnRefresh.enabled = true
+			btnAddToQueue.enabled = true
+			btnClean.enabled = true
 			
-			local item = dotNetObject "System.Windows.Forms.ListViewItem" ""
-			item.Checked = false
-			item.SubItems.Add("Ready")  -- Name of the material
-			lvItems.Items.Add(item)
-			
+			-- local allFiles = getFiles (selectedFolder + "\\*")
+			local allFolders = getDirectories (selectedFolder + "\\*")
+
+			-- print ("Files in " + selectedFolder + ":")
+			-- for file in allFiles do
+			-- (
+			-- 	print ("  File: " + (filenameFromPath file))
+			-- )
+
+			print ("Folders in " + selectedFolder + ":")
+			for folder in allFolders do
+			(
+				local item = dotNetObject "System.Windows.Forms.ListViewItem" ""
+				item.Checked = false
+				item.SubItems.Add(filenameFromPath folder)  -- Name of the material
+				lvItems.Items.Add(item)
+				print ("  Folder: " + (filenameFromPath folder))
+			)
         )
     )
 	
@@ -80,4 +106,4 @@ rollout ReawoteMatLoader title
 )
 
 -- Display the rollout
-createdialog ReawoteMatLoader width:390 height:320
+createdialog ReawoteMatLoader width:390 height: 410
