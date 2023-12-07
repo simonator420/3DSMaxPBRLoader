@@ -3,6 +3,7 @@ renderEngines = #("Corona", "VRay")
 labelWidth = 100  -- Width of the labels
 fullWidthElement = 375  -- Width of the dropdown and the editText
 buttonWidth = 80  -- Width of the Browse button
+global folderPaths = #()
 
 rollout ReawoteMatLoader title
 (
@@ -57,8 +58,12 @@ rollout ReawoteMatLoader title
     -- Event handler for the Browse button
     on btnBrowse pressed do
     (
+		print(RendererClass.classes)
         -- Code to handle the folder browsing and selection
         local selectedFolder = getSavePath()
+		-- Clear the existing items and folderPaths
+		lvItems.Items.Clear()
+		folderPaths = #()
         if selectedFolder != undefined do
         (
             -- Handle the selected folder
@@ -103,6 +108,7 @@ rollout ReawoteMatLoader title
 				mat.SubItems.Add(matName)  -- Name of the material
 				lvItems.Items.Add(mat)
 				print ("  Folder: " + (filenameFromPath folder))
+				append folderPaths folder
 			)
         )
     )
@@ -110,19 +116,70 @@ rollout ReawoteMatLoader title
 	-- Event handler for the Load Materials button
     on btnLoadMaterials pressed do
     (
-        -- Iterate through all items in the ListView
-    for i = 1 to lvItems.Items.Count do
-    (
-        local mat = lvItems.Items.Item[i-1]  -- ListView items are zero-indexed
+		-- Check the selected renderer
+		local selectedRenderer = ddlRenderer.selected
+		local slotIndex = 1 -- Start from the first slot
 
-        -- Check if the item is selected
-        if mat.Checked then
-        (
-            -- Print the name of the selected material
-            local selectedMat = mat.SubItems.Item[1].Text
-            print ("Selected Material: " + selectedMat)
-        )
-    )
+        -- Iterate through all materials in the ListView
+		for i = 1 to lvItems.Items.Count do
+		(
+			local mat = lvItems.Items.Item[i-1]
+
+			-- Check if the material is selected
+			if mat.Checked then
+			(
+
+				-- Switch renderer to Corona if it's selected
+				if selectedRenderer == "Corona" then  -- Assuming 'Corona' is the first item in ddlRenderer
+				(
+					local materialName = mat.SubItems.Item[1].Text
+					renderers.current = Corona()
+					local materialToAssign  = CoronaPhysicalMtl ()
+					materialToAssign.name = materialName
+					materialToAssign.roughnessMode = 1
+					print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
+				)
+
+				-- Switch renderer to VRay if it's selected
+				else if selectedRenderer == "VRay" then
+				(
+					-- TODO Make it so it takes all versions of VRAy
+					renderers.current = V_Ray_6__update_2()
+					print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
+				)
+				else(
+					print("Renderer nevybran")
+				)
+
+				if slotIndex <= meditMaterials.count then
+				(
+					meditMaterials[slotIndex] = materialToAssign
+					format "Assigned material to Material Editor slot: %\n" slotIndex
+					slotIndex += 1 -- Increment slot index for the next material
+				)
+				else
+				(
+					print "Ran out of Material Editor slots."
+					break -- Exit the loop if no more slots are available
+				)
+
+				local actualFolderPath = folderPaths[i]
+				local subfolders = getDirectories (actualFolderPath + "\\*")
+				-- Print out all subfolders of the actual material folder
+				if subfolders.count > 0 then
+				(
+					print ("Subfolders in " + actualFolderPath + ":")
+					for subfolder in subfolders do
+					(
+						print ("  Subfolder: " + (filenameFromPath subfolder))
+					)
+				)
+				else
+				(
+					print ("No subfolders in " + actualFolderPath)
+				)
+			)
+		)
     )
 )
 
