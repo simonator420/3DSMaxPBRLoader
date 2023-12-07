@@ -88,10 +88,20 @@ rollout ReawoteMatLoader title
 			print ("Folders in " + selectedFolder + ":")
 			for folder in allFolders do
 			(
-				local item = dotNetObject "System.Windows.Forms.ListViewItem" ""
-				item.Checked = false
-				item.SubItems.Add(filenameFromPath folder)  -- Name of the material
-				lvItems.Items.Add(item)
+				local folderName = filenameFromPath folder
+				local parts = filterString folderName "_"
+				local matName = if parts.count >= 3 then
+					(parts[1] + "_" + parts[2] + "_" + parts[3])
+				else
+					(folderName)  -- Fallback to the original folder name if not enough parts
+
+
+				print(parts)
+
+				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+				mat.Checked = false
+				mat.SubItems.Add(matName)  -- Name of the material
+				lvItems.Items.Add(mat)
 				print ("  Folder: " + (filenameFromPath folder))
 			)
         )
@@ -100,8 +110,19 @@ rollout ReawoteMatLoader title
 	-- Event handler for the Load Materials button
     on btnLoadMaterials pressed do
     (
-        -- Code to handle material loading
-        -- Add your logic here
+        -- Iterate through all items in the ListView
+    for i = 1 to lvItems.Items.Count do
+    (
+        local mat = lvItems.Items.Item[i-1]  -- ListView items are zero-indexed
+
+        -- Check if the item is selected
+        if mat.Checked then
+        (
+            -- Print the name of the selected material
+            local selectedMat = mat.SubItems.Item[1].Text
+            print ("Selected Material: " + selectedMat)
+        )
+    )
     )
 )
 
