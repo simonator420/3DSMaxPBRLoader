@@ -112,6 +112,12 @@ rollout ReawoteMatLoader title
 			)
         )
     )
+
+	fn createCoronaBitmapNode filePath = (
+		local bitmapNode = CoronaBitmap()
+		bitmapNode.filename = filePath
+		return bitmapNode
+	)
 	
 	-- Event handler for the Load Materials button
     on btnLoadMaterials pressed do
@@ -119,7 +125,9 @@ rollout ReawoteMatLoader title
 		-- Check the selected renderer
 		local selectedRenderer = ddlRenderer.selected
 		local slotIndex = 1 -- Start from the first slot
+		local diffuseMapPath = "C:\Users\Simon Salaj\Documents\reawote_remote\ADO\ADO_0550_TALISMAN-3314-110_F03\4K\ADO_0550_TALISMAN-3314-110_COL_4K.jpg"
 
+		local diffMap = createCoronaBitmapNode diffuseMapPath
         -- Iterate through all materials in the ListView
 		for i = 1 to lvItems.Items.Count do
 		(
@@ -137,6 +145,8 @@ rollout ReawoteMatLoader title
 					local materialToAssign  = CoronaPhysicalMtl ()
 					materialToAssign.name = materialName
 					materialToAssign.roughnessMode = 1
+					materialToAssign.baseTexmap = diffMap
+					showProperties diffMap
 					print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
 				)
 
@@ -172,6 +182,19 @@ rollout ReawoteMatLoader title
 					for subfolder in subfolders do
 					(
 						print ("  Subfolder: " + (filenameFromPath subfolder))
+						local parts = filterString subfolder "\\"
+						arrLength = parts.count
+						desiredFolder = parts[arrLength]
+						local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+						print(desiredFolder)
+						if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
+						(
+							local filesInSubfolder = getFiles (subfolder + "\\*")
+							for file in filesInSubfolder do
+							(
+								print ("    File: " + file)
+							)
+						)
 					)
 				)
 				else
