@@ -125,9 +125,6 @@ rollout ReawoteMatLoader title
 		-- Check the selected renderer
 		local selectedRenderer = ddlRenderer.selected
 		local slotIndex = 1 -- Start from the first slot
-		local diffuseMapPath = "C:\Users\Simon Salaj\Documents\reawote_remote\ADO\ADO_0550_TALISMAN-3314-110_F03\4K\ADO_0550_TALISMAN-3314-110_COL_4K.jpg"
-
-		local diffMap = createCoronaBitmapNode diffuseMapPath
         -- Iterate through all materials in the ListView
 		for i = 1 to lvItems.Items.Count do
 		(
@@ -136,7 +133,6 @@ rollout ReawoteMatLoader title
 			-- Check if the material is selected
 			if mat.Checked then
 			(
-
 				-- Switch renderer to Corona if it's selected
 				if selectedRenderer == "Corona" then  -- Assuming 'Corona' is the first item in ddlRenderer
 				(
@@ -145,10 +141,165 @@ rollout ReawoteMatLoader title
 					local materialToAssign  = CoronaPhysicalMtl ()
 					materialToAssign.name = materialName
 					materialToAssign.roughnessMode = 1
-					materialToAssign.baseTexmap = diffMap
-					showProperties diffMap
+
+					local actualFolderPath = folderPaths[i]
+					local subfolders = getDirectories (actualFolderPath + "\\*")
+					-- Print out all subfolders of the actual material folder
+					if subfolders.count > 0 then
+					(
+						print ("Subfolders in " + actualFolderPath + ":")
+						for subfolder in subfolders do
+						(
+							print ("  Subfolder: " + (filenameFromPath subfolder))
+							local parts = filterString subfolder "\\"
+							arrLength = parts.count
+							desiredFolder = parts[arrLength]
+							local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+							print(desiredFolder)
+							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
+							(
+								local filesInSubfolder = getFiles (subfolder + "\\*")
+								local mapsList = #()
+								for file in filesInSubfolder do
+								(
+									local matParts = filterString file "\\"
+									local matPartsLength = matParts.count
+									local fileName = matParts[matPartsLength]
+
+									local fileNameParts = filterString fileName "_"
+									local fileNamePartsLength = fileNameParts.count
+									local map = fileNameParts[fileNamePartsLength-1]
+									append mapsList map
+								)
+								
+								print(mapsList)
+								local compositeLoaded = false
+								local compositeMap = None
+								for file in filesInSubfolder do
+								(
+									local matParts = filterString file "\\"
+									local matPartsLength = matParts.count
+									local fileName = matParts[matPartsLength]
+
+									local fileNameParts = filterString fileName "_"
+									local fileNamePartsLength = fileNameParts.count
+									local map = fileNameParts[fileNamePartsLength-1]
+
+									print(fileName)
+									if map == "COL" then
+									(
+										if loadAO.checked and (findItem mapsList "AO") != 0 then
+										(
+											local baseColorMapPath = file
+											local baseColorMap = createCoronaBitmapNode baseColorMapPath
+											baseColorMap.name = map
+											
+											if compositeLoaded != 1 then
+											(
+												compositeMap = CompositeTexturemap()
+												compositeMap.mapEnabled.count = 2
+												materialToAssign.baseTexmap = compositeMap
+												compositeLoaded = true
+											)
+											compositeMap.mapList[1] = baseColorMap
+											print(map)
+										)
+										else
+										(
+											local baseColorMapPath = file
+											local baseColorMap = createCoronaBitmapNode baseColorMapPath
+											baseColorMap.name = map
+											materialToAssign.baseTexmap = baseColorMap
+											print(compositeLoaded)
+											print(map)
+										)
+											
+									)
+									else if map == "AO" then
+									(
+										if loadAO.checked and (findItem mapsList "AO") != 0 then
+										(
+											local aoMapPath = file
+											local aoMap = createCoronaBitmapNode aoMapPath
+											aoMap.name = map
+
+											if compositeLoaded != 1 then
+											(
+												compositeMap = CompositeTexturemap()
+												compositeMap.mapEnabled.count = 2
+												materialToAssign.baseTexmap = compositeMap
+												compositeLoaded = true
+											)
+
+											compositeMap.mapList[2] = aoMap
+											print(compositeLoaded)
+											print(map)
+										) 
+									)
+									else if map == "GLOSS" then
+									(
+										local baseGlossMapPath = file
+										local baseGlossMap = createCoronaBitmapNode baseGlossMapPath
+										baseGlossMap.name = Map
+										materialToAssign.baseRoughnessTexmap = baseGlossMap
+										print(map)
+									)
+									else if map == "METAL" then
+									(
+										local metalnessMapPath = file
+										local metalnessMap = createCoronaBitmapNode metalnessMapPath
+										metalnessMap.name = map
+										materialToAssign.metalnessTexmap = metalnessMap
+										print(map)
+									)
+									else if map == "OPAC" then
+									(
+										local opacityColorMapPath = file
+										local opacityColorMap = createCoronaBitmapNode opacityColorMapPath
+										opacityColorMap.name = map
+										materialToAssign.opacityTexmap = opacityColorMap
+										print(map)
+									)
+									else if map == "SSS" then
+									(
+										local sssMapPath = file
+										local sssMap = createCoronaBitmapNode sssMapPath
+										sssMap.name = map
+										materialToAssign.sssAmount = 1.0
+										materialToAssign.sssScatterTexmap = sssMap
+										print(map)
+									)
+									else if map == "SHEEN" then
+									(
+										local sheenMapPath = file
+										local sheenMap = createCoronaBitmapNode sheenMapPath
+										sheenMap.name = map
+										materialToAssign.sheenAmountTexmap = sheenMap
+										print(map)
+									)
+									else if map == "SHEENGLOSS" then
+									(
+										local sheenglossMapPath = file
+										local sheenglossMap = createCoronaBitmapNode sheenglossMapPath
+										sheenglossMap.name = map
+										materialToAssign.sheenAmount = 1.0
+										materialToAssign.sheenRoughnessTexmap = sheenglossMap
+										print(map)
+									)
+									print ("    File: " + file)
+								)
+							)
+						)
+					)
+					else
+					(
+						print ("No subfolders in " + actualFolderPath)
+					)
 					print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
 				)
+
+
+
 
 				-- Switch renderer to VRay if it's selected
 				else if selectedRenderer == "VRay" then
@@ -171,35 +322,6 @@ rollout ReawoteMatLoader title
 				(
 					print "Ran out of Material Editor slots."
 					break -- Exit the loop if no more slots are available
-				)
-
-				local actualFolderPath = folderPaths[i]
-				local subfolders = getDirectories (actualFolderPath + "\\*")
-				-- Print out all subfolders of the actual material folder
-				if subfolders.count > 0 then
-				(
-					print ("Subfolders in " + actualFolderPath + ":")
-					for subfolder in subfolders do
-					(
-						print ("  Subfolder: " + (filenameFromPath subfolder))
-						local parts = filterString subfolder "\\"
-						arrLength = parts.count
-						desiredFolder = parts[arrLength]
-						local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
-						print(desiredFolder)
-						if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
-						(
-							local filesInSubfolder = getFiles (subfolder + "\\*")
-							for file in filesInSubfolder do
-							(
-								print ("    File: " + file)
-							)
-						)
-					)
-				)
-				else
-				(
-					print ("No subfolders in " + actualFolderPath)
 				)
 			)
 		)
