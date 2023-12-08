@@ -198,6 +198,7 @@ rollout ReawoteMatLoader title
 											(
 												compositeMap = CompositeTexturemap()
 												compositeMap.mapEnabled.count = 2
+												compositeMap.blendMode[2] = 5
 												materialToAssign.baseTexmap = compositeMap
 												compositeLoaded = true
 											)
@@ -227,6 +228,7 @@ rollout ReawoteMatLoader title
 											(
 												compositeMap = CompositeTexturemap()
 												compositeMap.mapEnabled.count = 2
+												compositeMap.blendMode[2] = 5
 												materialToAssign.baseTexmap = compositeMap
 												compositeLoaded = true
 											)
