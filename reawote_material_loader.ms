@@ -288,6 +288,59 @@ rollout ReawoteMatLoader title
 										materialToAssign.sheenRoughnessTexmap = sheenglossMap
 										print(map)
 									)
+									else if map == "NRM" then
+									(
+										if (load16Nrm.checked == 0) or (findItem mapsList "NRM16" == 0) then
+										(
+											local nrmMapNode = CoronaNormal()
+											local nrmMapPath = file
+											local nrmMap = createCoronaBitmapNode nrmMapPath
+											nrmMap.name = map
+											nrmMapNode.normalMap = nrmMap
+											nrmMapNode.flipgreen = on
+											nrmMapNode.addGamma = on
+											materialToAssign.baseBumpTexmap = nrmMapNode
+											print(map)
+										)
+									)
+									else if map == "NRM16" then
+									(
+										if (load16Nrm.checked != 0) and (findItem mapsList "NRM16" != 0) then
+										(
+											local nrmMapNode = CoronaNormal()
+											local nrmMapPath = file
+											local nrmMap = createCoronaBitmapNode nrmMapPath
+											nrmMap.name = "NRM"
+											nrmMapNode.normalMap = nrmMap
+											nrmMapNode.flipgreen = on
+											nrmMapNode.addGamma = on
+											materialToAssign.baseBumpTexmap = nrmMapNode
+											print(map)
+										)
+									)
+									else if (map == "DISP") and (loadDisp.checked == 1) then
+									(
+										if (load16Disp.checked == 0) or (findItem mapsList "DISP16" == 0) then
+										(
+											local dispMapPath = file
+											local dispMap = createCoronaBitmapNode dispMapPath
+											dispMap.name = map
+											materialToAssign.displacementTexmap = dispMap
+											print(map)
+										)
+									)
+									else if (map == "DISP16") and (loadDisp.checked == 1) then
+									(
+										if (load16Disp.checked != 0) and (findItem mapsList "DISP16" != 0) then
+										(
+											local dispMapPath = file
+											local dispMap = createCoronaBitmapNode dispMapPath
+											dispMap.name = "DISP"
+											materialToAssign.displacementTexmap = dispMap
+											print(map)
+										)
+									)
+
 									print ("    File: " + file)
 								)
 							)
