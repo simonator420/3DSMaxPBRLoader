@@ -353,15 +353,70 @@ rollout ReawoteMatLoader title
 					print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
 				)
 
-
-
-
 				-- Switch renderer to VRay if it's selected
 				else if selectedRenderer == "VRay" then
 				(
 					-- TODO Make it so it takes all versions of VRAy
 					renderers.current = V_Ray_6__update_2()
 					print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
+					local materialName = mat.SubItems.Item[1].Text
+					local materialToAssign  = VRayMtl ()
+					materialToAssign.name = materialName
+
+					local actualFolderPath = folderPaths[i]
+					local subfolders = getDirectories (actualFolderPath + "\\*")
+					-- Print out all subfolders of the actual material folder
+					if subfolders.count > 0 then
+					(
+						print ("Subfolders in " + actualFolderPath + ":")
+						for subfolder in subfolders do
+						(
+							print ("  Subfolder: " + (filenameFromPath subfolder))
+							local parts = filterString subfolder "\\"
+							arrLength = parts.count
+							desiredFolder = parts[arrLength]
+							local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+							print(desiredFolder)
+							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
+							(
+								local filesInSubfolder = getFiles (subfolder + "\\*")
+								local mapsList = #()
+								for file in filesInSubfolder do
+								(
+									local matParts = filterString file "\\"
+									local matPartsLength = matParts.count
+									local fileName = matParts[matPartsLength]
+
+									local fileNameParts = filterString fileName "_"
+									local fileNamePartsLength = fileNameParts.count
+									local map = fileNameParts[fileNamePartsLength-1]
+									append mapsList map
+								)
+								
+								print(mapsList)
+								local compositeLoaded = false
+								local compositeMap = None
+								for file in filesInSubfolder do
+								(
+									local matParts = filterString file "\\"
+									local matPartsLength = matParts.count
+									local fileName = matParts[matPartsLength]
+
+									local fileNameParts = filterString fileName "_"
+									local fileNamePartsLength = fileNameParts.count
+									local map = fileNameParts[fileNamePartsLength-1]
+
+									print(fileName)
+									if map == "COL" then
+									(
+										if loadAO.checked and (findItem mapsList "AO") != 0 then
+										(
+										)
+									)
+								)
+							)
+						)
+					)
 				)
 				else(
 					print("Renderer nevybran")
