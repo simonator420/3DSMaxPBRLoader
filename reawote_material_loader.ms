@@ -118,6 +118,14 @@ rollout ReawoteMatLoader title
 		bitmapNode.filename = filePath
 		return bitmapNode
 	)
+
+	fn createVrayBitmapNode filePath =
+	(
+		local vrayNode = VRayBitmap()
+		vrayNode.filename = filePath
+		return vrayNode
+	)
+
 	
 	-- Event handler for the Load Materials button
     on btnLoadMaterials pressed do
@@ -411,7 +419,116 @@ rollout ReawoteMatLoader title
 									(
 										if loadAO.checked and (findItem mapsList "AO") != 0 then
 										(
+											local diffuseMapPath = file
+											local diffuseMapis = createVrayBitmapNode diffuseMapPath
+											diffuseMapis.name = map
+											materialToAssign.texmap_diffuse = diffuseMapis
 										)
+									)
+									else if map == "GLOSS" then -- done
+									(
+										local glossMapPath = file
+										local glossMap = createVrayBitmapNode glossMapPath
+										glossMap.name = map
+										glossMap.color_space = 0 -- None
+										glossMap.rgbColorSpace = 3 -- Raw
+										materialToAssign.Reflection = white
+										materialToAssign.texmap_reflectionGlossiness = glossMap
+									)
+									else if map == "NRM" then -- done
+									(
+										if (load16Nrm.checked == 0) or (findItem mapsList "NRM16" == 0) then
+										(
+											local nrmMapNode = VRayNormalMap()
+											local nrmMapPath = file
+											local nrmMap = createVrayBitmapNode nrmMapPath
+											nrmMap.name = map
+											nrmMap.color_space = 0 -- None
+											nrmMap.rgbColorSpace = 3 -- Raw
+											nrmMapNode.NormalMap = nrmMap
+											materialToAssign.texmap_bump_multiplier = 100.0
+											materialToAssign.texmap_bump = nrmMapNode
+										)
+									)
+									else if map == "NRM16" then -- done
+									(
+										if (load16Nrm.checked != 0) and (findItem mapsList "NRM16" != 0) then
+										(
+											local nrmMapNode = VRayNormalMap()
+											local nrmMapPath = file
+											local nrmMap = createVrayBitmapNode nrmMapPath
+											nrmMap.name = "NRM"
+											nrmMap.color_space = 0 -- None
+											nrmMap.rgbColorSpace = 3 -- Raw
+											nrmMapNode.NormalMap = nrmMap
+											materialToAssign.texmap_bump_multiplier = 100.0
+											materialToAssign.texmap_bump = nrmMapNode
+										)
+									)
+									else if (map == "DISP") and (loadDisp.checked == 1) then
+									(
+										if (load16Disp.checked == 0) or (findItem mapsList "DISP16" == 0) then
+										(
+											local dispMapPath = file
+											local dispMap = createVrayBitmapNode dispMapPath
+											dispMap.name = map
+											materialToAssign.texmap_displacement_multiplier = 1.0
+											materialToAssign.texmap_displacement = dispMap
+											print(map)
+										)
+									)
+									else if (map == "DISP16") and (loadDisp.checked == 1) then
+									(
+										if (load16Disp.checked != 0) and (findItem mapsList "DISP16" != 0) then
+										(
+											local dispMapPath = file
+											local dispMap = createVrayBitmapNode dispMapPath
+											dispMap.name = "DISP"
+											materialToAssign.texmap_displacement_multiplier = 1.0
+											materialToAssign.texmap_displacement = dispMap
+											print(map)
+										)
+									)
+									else if map == "METAL" then
+									(
+										local metalnessMapPath = file
+										local metalnessMap = createVrayBitmapNode metalnessMapPath
+										metalnessMap.name = map
+										metalnessMap.color_space = 0 -- None
+										metalnessMap.rgbColorSpace = 3 -- Raw
+										materialToAssign.texmap_metalness = metalnessMap
+										print(map)
+									)
+									else if map == "OPAC" then
+									(
+										local opacityColorMapPath = file
+										local opacityColorMap = createVrayBitmapNode opacityColorMapPath
+										opacityColorMap.name = map
+										opacityColorMap.color_space = 0 -- None
+										opacityColorMap.rgbColorSpace = 3 -- Raw
+										materialToAssign.texmap_opacity = opacityColorMap
+										print(map)
+									)
+									else if map == "SSS" then
+									(
+										local sssMapPath = file
+										local sssMap = createVrayBitmapNode sssMapPath
+										sssMap.name = map
+										sssMap.color_space = 2
+										sssMap.rgbColorSpace = 1
+										materialToAssign.translucency_on = 6
+										materialToAssign.texmap_translucent = sssMap
+										print(map)
+									)
+									else if map == "SHEENGLOSS" then
+									(
+										local sheenglossMapPath = file
+										local sheenglossMap = createVrayBitmapNode sheenglossMapPath
+										sheenglossMap.name = map
+										sheenglossMap.color_space = 0 -- None
+										sheenglossMap.rgbColorSpace = 3 -- Raw
+										materialToAssign.texmap_sheen_glossiness = sheenglossMap
+										print(map)
 									)
 								)
 							)
@@ -439,4 +556,4 @@ rollout ReawoteMatLoader title
 )
 
 -- Display the rollout
-createdialog ReawoteMatLoader width:390 height: 410
+createdialog ReawoteMatLoader width:390 height: 410 
