@@ -419,11 +419,52 @@ rollout ReawoteMatLoader title
 									(
 										if loadAO.checked and (findItem mapsList "AO") != 0 then
 										(
-											local diffuseMapPath = file
-											local diffuseMapis = createVrayBitmapNode diffuseMapPath
-											diffuseMapis.name = map
-											materialToAssign.texmap_diffuse = diffuseMapis
+											local colourMapPath = file
+											local colourMap = createVrayBitmapNode colourMapPath
+											colourMap.name = map
+											if compositeLoaded != 1 then
+											(
+												compositeMap = CompositeTexturemap()
+												compositeMap.mapEnabled.count = 2
+												compositeMap.blendMode[2] = 5
+												materialToAssign.texmap_diffuse = compositeMap
+												compositeLoaded = true
+											)
+											compositeMap.mapList[1] = colourMap
 										)
+										else
+										(
+											local colourMapPath = file
+											local colourMap = createVrayBitmapNode colourMapPath
+											colourMap.name = map
+											colourMap.color_space = 2
+											colourMap.rgbColorSpace = 1
+											materialToAssign.texmap_diffuse = colourMap
+										)
+									)
+									else if map == "AO" then
+									(
+										if loadAO.checked and (findItem mapsList "AO") != 0 then
+										(
+											local aoMapPath = file
+											local aoMap = createVrayBitmapNode aoMapPath
+											aoMap.name = map
+											aoMap.color_space = 2
+											aoMap.rgbColorSpace = 1
+
+											if compositeLoaded != 1 then
+											(
+												compositeMap = CompositeTexturemap()
+												compositeMap.mapEnabled.count = 2
+												compositeMap.blendMode[2] = 5
+												materialToAssign.texmap_diffuse = compositeMap
+												compositeLoaded = true
+											)
+
+											compositeMap.mapList[2] = aoMap
+											print(compositeLoaded)
+											print(map)
+										) 
 									)
 									else if map == "GLOSS" then -- done
 									(
