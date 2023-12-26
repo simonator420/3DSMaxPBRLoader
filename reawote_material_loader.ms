@@ -4,6 +4,8 @@ labelWidth = 100  -- Width of the labels
 fullWidthElement = 375  -- Width of the dropdown and the editText
 buttonWidth = 80  -- Width of the Browse button
 global folderPaths = #()
+global allFolderPaths = #()
+
 
 rollout ReawoteMatLoader title
 (
@@ -62,10 +64,14 @@ rollout ReawoteMatLoader title
         -- Code to handle the folder browsing and selection
         local selectedFolder = getSavePath()
 		-- Clear the existing items and folderPaths
+		append allFolderPaths selectedFolder
+		print(allFolderPaths)
 		lvItems.Items.Clear()
 		folderPaths = #()
         if selectedFolder != undefined do
         (
+
+			initiallySelectedFolder = selectedFolder
             -- Handle the selected folder
             edtSelectedPath.text = selectedFolder
             -- Handle the enabling
@@ -141,6 +147,9 @@ rollout ReawoteMatLoader title
 			-- Check if the material is selected
 			if mat.Checked then
 			(
+				local actualFolderPath = folderPaths[i]
+				local subfolders = getDirectories (actualFolderPath + "\\*")
+
 				-- Switch renderer to Corona if it's selected
 				if selectedRenderer == "Corona" then  -- Assuming 'Corona' is the first item in ddlRenderer
 				(
@@ -150,8 +159,6 @@ rollout ReawoteMatLoader title
 					materialToAssign.name = materialName
 					materialToAssign.roughnessMode = 1
 
-					local actualFolderPath = folderPaths[i]
-					local subfolders = getDirectories (actualFolderPath + "\\*")
 					-- Print out all subfolders of the actual material folder
 					if subfolders.count > 0 then
 					(
@@ -594,6 +601,112 @@ rollout ReawoteMatLoader title
 			)
 		)
     )
+
+	-- Event handler for the Select All button
+	on btnSelectAll pressed do
+	(
+		for matIndex = 1 to lvItems.Items.Count do
+		(
+			local mat = lvItems.Items.Item[matIndex - 1]
+			mat.Checked = true
+		)
+	)
+
+	-- Event handler for the Refresh button
+	on btnRefresh pressed do
+	(
+		lvItems.Items.Clear() -- Clear existing items in the ListView
+
+		-- Iterate through all folders in allFolderPaths and their subfolders
+		for folder in allFolderPaths do
+		(
+			local allSubFolders = getDirectories (folder + "\\*")
+
+			for subFolder in allSubFolders do
+			(
+				local folderName = filenameFromPath subFolder
+				local parts = filterString folderName "_"
+				local matName = if parts.count >= 3 then
+					(parts[1] + "_" + parts[2] + "_" + parts[3])
+				else
+					(folderName)  -- Fallback to the original folder name if not enough parts
+
+				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+				mat.Checked = false
+				mat.SubItems.Add(matName)  -- Name of the material
+				lvItems.Items.Add(mat)
+			)
+		)
+	)
+
+
+	on btnAddToQueue pressed do
+	(
+		local additionalFolder = getSavePath() -- Get additional folder path
+		append allFolderPaths additionalFolder
+		print(allFolderPaths)
+		if additionalFolder != undefined do
+		(
+			append folderPaths additionalFolder -- Append new folder to global list
+			local allFolders = getDirectories (additionalFolder + "\\*")
+
+			-- Add new folders to ListView
+			for folder in allFolders do
+			(
+				local folderName = filenameFromPath folder
+				local parts = filterString folderName "_"
+				local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+
+				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+				mat.Checked = false
+				mat.SubItems.Add(matName)
+				lvItems.Items.Add(mat)
+				append folderPaths folder
+			)
+		)
+	)
+
+	-- Event handler for the Clean button
+	on btnClean pressed do
+	(
+		-- Uncheck all materials in the ListView
+		for matIndex = 1 to lvItems.Items.Count do
+		(
+			local mat = lvItems.Items.Item[matIndex - 1]
+			mat.Checked = false
+		)
+
+		-- Clear the ListView items
+		lvItems.Items.Clear()
+
+		-- Reset the global lists
+		folderPaths = #()
+		allFolderPaths = #()
+
+		-- Reset the EditText for displaying selected path
+		edtSelectedPath.text = ""
+		edtSelectedPath.enabled = false
+
+		-- Disable and reset the checkboxes
+		loadAO.checked = false
+		loadAO.enabled = false
+		loadDisp.checked = false
+		loadDisp.enabled = false
+		load16Nrm.checked = false
+		load16Nrm.enabled = false
+		load16Disp.checked = false
+		load16Disp.enabled = false
+
+		-- Disable the buttons
+		btnLoadMaterials.enabled = false
+		btnSelectAll.enabled = false
+		btnRefresh.enabled = false
+		btnAddToQueue.enabled = false
+		btnClean.enabled = false
+
+		-- Disable the dropdown
+		ddlRenderer.enabled = false
+	)
 )
 
 -- Display the rollout
