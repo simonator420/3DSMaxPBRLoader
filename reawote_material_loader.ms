@@ -1,7 +1,7 @@
 title = "Reawote PBR Loader"
 renderEngines = #("Corona", "VRay")
 labelWidth = 100  -- Width of the labels
-fullWidthElement = 375  -- Width of the dropdown and the editText
+fullWidthElement = 425  -- Width of the dropdown and the editText
 buttonWidth = 80  -- Width of the Browse button
 global folderPaths = #()
 global allFolderPaths = #()
@@ -13,13 +13,13 @@ rollout ReawoteMatLoader title
     label lblMaterialFolder "Material Folder" pos:[10,5] width:labelWidth
 
     -- Browse button
-    button btnBrowse "Browse" pos:[300,5] width:buttonWidth
+    button btnBrowse "Browse" pos:[350,5] width:buttonWidth
 
     -- Label for Select Renderer text
     label lblSelectRenderer "Select Renderer" pos:[10,30] width:labelWidth
 
     -- ComboBox for renderer selection
-    dropdownlist ddlRenderer items:renderEngines pos:[300,30] width:buttonWidth enabled:false
+    dropdownlist ddlRenderer items:renderEngines pos:[350,30] width:buttonWidth enabled:false
 
     -- EditText for displaying selected path
     edittext edtSelectedPath "" pos:[5,60] width:fullWidthElement enabled:false
@@ -39,7 +39,7 @@ rollout ReawoteMatLoader title
 	button btnClean "Clean" pos:[260, 205] width:buttonWidth enabled:false
 
 	
-	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:150
+	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:250
 	
 	on ReawoteMatLoader open do
     (
@@ -50,7 +50,7 @@ rollout ReawoteMatLoader title
         lvItems.GridLines = true
 
         local checkColumnWidth = 50 -- Width for the "Check" column
-		local nameColumnWidth = 320 -- Width for the "Name" column
+		local nameColumnWidth = 370 -- Width for the "Name" column
 
 		lvItems.columns.add("Check") checkColumnWidth
 		lvItems.columns.add("Name") nameColumnWidth
@@ -86,6 +86,14 @@ rollout ReawoteMatLoader title
 			btnRefresh.enabled = true
 			btnAddToQueue.enabled = true
 			btnClean.enabled = true
+
+			load16Disp.checked = true
+			loadDisp.checked = true
+			load16Nrm.checked = true
+			loadAO.checked = true
+
+			btnBrowse.enabled = false
+
 			
 			-- local allFiles = getFiles (selectedFolder + "\\*")
 			local allFolders = getDirectories (selectedFolder + "\\*")
@@ -605,10 +613,23 @@ rollout ReawoteMatLoader title
 	-- Event handler for the Select All button
 	on btnSelectAll pressed do
 	(
+		-- Check if all items are currently selected
+		local allSelected = true
 		for matIndex = 1 to lvItems.Items.Count do
 		(
 			local mat = lvItems.Items.Item[matIndex - 1]
-			mat.Checked = true
+			if not mat.Checked then
+			(
+				allSelected = false
+				break
+			)
+		)
+
+		-- If all items are selected, deselect all. Otherwise, select all.
+		for matIndex = 1 to lvItems.Items.Count do
+		(
+			local mat = lvItems.Items.Item[matIndex - 1]
+			mat.Checked = not allSelected
 		)
 	)
 
@@ -682,6 +703,7 @@ rollout ReawoteMatLoader title
 		-- Reset the global lists
 		folderPaths = #()
 		allFolderPaths = #()
+		btnBrowse.enabled = true
 
 		-- Reset the EditText for displaying selected path
 		edtSelectedPath.text = ""
@@ -710,4 +732,4 @@ rollout ReawoteMatLoader title
 )
 
 -- Display the rollout
-createdialog ReawoteMatLoader width:390 height: 410 
+createdialog ReawoteMatLoader width:440 height: 510 
