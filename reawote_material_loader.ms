@@ -60,12 +60,12 @@ rollout ReawoteMatLoader title
     -- Event handler for the Browse button
     on btnBrowse pressed do
     (
-		print(RendererClass.classes)
+		-- print(RendererClass.classes)
         -- Code to handle the folder browsing and selection
         local selectedFolder = getSavePath()
 		-- Clear the existing items and folderPaths
 		append allFolderPaths selectedFolder
-		print(allFolderPaths)
+		-- print(allFolderPaths)
 		lvItems.Items.Clear()
 		folderPaths = #()
         if selectedFolder != undefined do
@@ -98,13 +98,13 @@ rollout ReawoteMatLoader title
 			-- local allFiles = getFiles (selectedFolder + "\\*")
 			local allFolders = getDirectories (selectedFolder + "\\*")
 
-			-- print ("Files in " + selectedFolder + ":")
+			-- -- print ("Files in " + selectedFolder + ":")
 			-- for file in allFiles do
 			-- (
-			-- 	print ("  File: " + (filenameFromPath file))
+			-- 	-- print ("  File: " + (filenameFromPath file))
 			-- )
 
-			print ("Folders in " + selectedFolder + ":")
+			-- print ("Folders in " + selectedFolder + ":")
 			for folder in allFolders do
 			(
 				local folderName = filenameFromPath folder
@@ -115,13 +115,13 @@ rollout ReawoteMatLoader title
 					(folderName)  -- Fallback to the original folder name if not enough parts
 
 
-				print(parts)
+				-- print(parts)
 
 				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
 				mat.Checked = false
 				mat.SubItems.Add(matName)  -- Name of the material
 				lvItems.Items.Add(mat)
-				print ("  Folder: " + (filenameFromPath folder))
+				-- print ("  Folder: " + (filenameFromPath folder))
 				append folderPaths folder
 			)
         )
@@ -167,18 +167,18 @@ rollout ReawoteMatLoader title
 					materialToAssign.name = materialName
 					materialToAssign.roughnessMode = 1
 
-					-- Print out all subfolders of the actual material folder
+					-- -- print out all subfolders of the actual material folder
 					if subfolders.count > 0 then
 					(
-						print ("Subfolders in " + actualFolderPath + ":")
+						-- print ("Subfolders in " + actualFolderPath + ":")
 						for subfolder in subfolders do
 						(
-							print ("  Subfolder: " + (filenameFromPath subfolder))
+							-- print ("  Subfolder: " + (filenameFromPath subfolder))
 							local parts = filterString subfolder "\\"
 							arrLength = parts.count
 							desiredFolder = parts[arrLength]
 							local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
-							print(desiredFolder)
+							-- print(desiredFolder)
 							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
 							(
 								local filesInSubfolder = getFiles (subfolder + "\\*")
@@ -195,7 +195,7 @@ rollout ReawoteMatLoader title
 									append mapsList map
 								)
 								
-								print(mapsList)
+								-- print(mapsList)
 								local compositeLoaded = false
 								local compositeMap = None
 								for file in filesInSubfolder do
@@ -208,7 +208,7 @@ rollout ReawoteMatLoader title
 									local fileNamePartsLength = fileNameParts.count
 									local map = fileNameParts[fileNamePartsLength-1]
 
-									print(fileName)
+									-- print(fileName)
 									if map == "COL" then
 									(
 										if loadAO.checked and (findItem mapsList "AO") != 0 then
@@ -226,7 +226,7 @@ rollout ReawoteMatLoader title
 												compositeLoaded = true
 											)
 											compositeMap.mapList[1] = baseColorMap
-											print(map)
+											-- print(map)
 										)
 										else
 										(
@@ -234,8 +234,8 @@ rollout ReawoteMatLoader title
 											local baseColorMap = createCoronaBitmapNode baseColorMapPath
 											baseColorMap.name = map
 											materialToAssign.baseTexmap = baseColorMap
-											print(compositeLoaded)
-											print(map)
+											-- print(compositeLoaded)
+											-- print(map)
 										)
 											
 									)
@@ -257,8 +257,8 @@ rollout ReawoteMatLoader title
 											)
 
 											compositeMap.mapList[2] = aoMap
-											print(compositeLoaded)
-											print(map)
+											-- print(compositeLoaded)
+											-- print(map)
 										) 
 									)
 									else if map == "GLOSS" then
@@ -267,7 +267,7 @@ rollout ReawoteMatLoader title
 										local baseGlossMap = createCoronaBitmapNode baseGlossMapPath
 										baseGlossMap.name = Map
 										materialToAssign.baseRoughnessTexmap = baseGlossMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "METAL" then
 									(
@@ -275,7 +275,7 @@ rollout ReawoteMatLoader title
 										local metalnessMap = createCoronaBitmapNode metalnessMapPath
 										metalnessMap.name = map
 										materialToAssign.metalnessTexmap = metalnessMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "OPAC" then
 									(
@@ -283,7 +283,7 @@ rollout ReawoteMatLoader title
 										local opacityColorMap = createCoronaBitmapNode opacityColorMapPath
 										opacityColorMap.name = map
 										materialToAssign.opacityTexmap = opacityColorMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "SSS" then
 									(
@@ -292,7 +292,7 @@ rollout ReawoteMatLoader title
 										sssMap.name = map
 										materialToAssign.sssAmount = 1.0
 										materialToAssign.sssScatterTexmap = sssMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "SHEEN" then
 									(
@@ -300,7 +300,7 @@ rollout ReawoteMatLoader title
 										local sheenMap = createCoronaBitmapNode sheenMapPath
 										sheenMap.name = map
 										materialToAssign.sheenAmountTexmap = sheenMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "SHEENGLOSS" then
 									(
@@ -309,7 +309,7 @@ rollout ReawoteMatLoader title
 										sheenglossMap.name = map
 										materialToAssign.sheenAmount = 1.0
 										materialToAssign.sheenRoughnessTexmap = sheenglossMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "NRM" then
 									(
@@ -323,7 +323,7 @@ rollout ReawoteMatLoader title
 											nrmMapNode.flipgreen = on
 											nrmMapNode.addGamma = on
 											materialToAssign.baseBumpTexmap = nrmMapNode
-											print(map)
+											-- print(map)
 										)
 									)
 									else if map == "NRM16" then
@@ -333,12 +333,12 @@ rollout ReawoteMatLoader title
 											local nrmMapNode = CoronaNormal()
 											local nrmMapPath = file
 											local nrmMap = createCoronaBitmapNode nrmMapPath
-											nrmMap.name = "NRM"
+											nrmMap.name = map
 											nrmMapNode.normalMap = nrmMap
 											nrmMapNode.flipgreen = on
 											nrmMapNode.addGamma = on
 											materialToAssign.baseBumpTexmap = nrmMapNode
-											print(map)
+											-- print(map)
 										)
 									)
 									else if (map == "DISP") and (loadDisp.checked == 1) then
@@ -349,7 +349,7 @@ rollout ReawoteMatLoader title
 											local dispMap = createCoronaBitmapNode dispMapPath
 											dispMap.name = map
 											materialToAssign.displacementTexmap = dispMap
-											print(map)
+											-- print(map)
 										)
 									)
 									else if (map == "DISP16") and (loadDisp.checked == 1) then
@@ -358,22 +358,22 @@ rollout ReawoteMatLoader title
 										(
 											local dispMapPath = file
 											local dispMap = createCoronaBitmapNode dispMapPath
-											dispMap.name = "DISP"
+											dispMap.name = map
 											materialToAssign.displacementTexmap = dispMap
-											print(map)
+											-- print(map)
 										)
 									)
 
-									print ("    File: " + file)
+									-- print ("    File: " + file)
 								)
 							)
 						)
 					)
 					else
 					(
-						print ("No subfolders in " + actualFolderPath)
+						-- print ("No subfolders in " + actualFolderPath)
 					)
-					print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
+					-- print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
 				)
 
 				-- Switch renderer to VRay if it's selected
@@ -381,25 +381,25 @@ rollout ReawoteMatLoader title
 				(
 					-- TODO Make it so it takes all versions of VRAy
 					renderers.current = V_Ray_6__update_2()
-					print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
+					-- print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
 					local materialName = mat.SubItems.Item[1].Text
 					local materialToAssign  = VRayMtl ()
 					materialToAssign.name = materialName
 
 					local actualFolderPath = folderPaths[i]
 					local subfolders = getDirectories (actualFolderPath + "\\*")
-					-- Print out all subfolders of the actual material folder
+					-- -- print out all subfolders of the actual material folder
 					if subfolders.count > 0 then
 					(
-						print ("Subfolders in " + actualFolderPath + ":")
+						-- print ("Subfolders in " + actualFolderPath + ":")
 						for subfolder in subfolders do
 						(
-							print ("  Subfolder: " + (filenameFromPath subfolder))
+							-- print ("  Subfolder: " + (filenameFromPath subfolder))
 							local parts = filterString subfolder "\\"
 							arrLength = parts.count
 							desiredFolder = parts[arrLength]
 							local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
-							print(desiredFolder)
+							-- print(desiredFolder)
 							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
 							(
 								local filesInSubfolder = getFiles (subfolder + "\\*")
@@ -416,7 +416,7 @@ rollout ReawoteMatLoader title
 									append mapsList map
 								)
 								
-								print(mapsList)
+								-- print(mapsList)
 								local compositeLoaded = false
 								local compositeMap = None
 								for file in filesInSubfolder do
@@ -429,7 +429,7 @@ rollout ReawoteMatLoader title
 									local fileNamePartsLength = fileNameParts.count
 									local map = fileNameParts[fileNamePartsLength-1]
 
-									print(fileName)
+									-- print(fileName)
 									if map == "COL" then
 									(
 										if loadAO.checked and (findItem mapsList "AO") != 0 then
@@ -437,6 +437,8 @@ rollout ReawoteMatLoader title
 											local colourMapPath = file
 											local colourMap = createVrayBitmapNode colourMapPath
 											colourMap.name = map
+											colourMap.color_space = 2
+											colourMap.rgbColorSpace = 1
 											if compositeLoaded != 1 then
 											(
 												compositeMap = CompositeTexturemap()
@@ -477,8 +479,8 @@ rollout ReawoteMatLoader title
 											)
 
 											compositeMap.mapList[2] = aoMap
-											print(compositeLoaded)
-											print(map)
+											-- print(compositeLoaded)
+											-- print(map)
 										) 
 									)
 									else if map == "GLOSS" then -- done
@@ -513,7 +515,7 @@ rollout ReawoteMatLoader title
 											local nrmMapNode = VRayNormalMap()
 											local nrmMapPath = file
 											local nrmMap = createVrayBitmapNode nrmMapPath
-											nrmMap.name = "NRM"
+											nrmMap.name = map
 											nrmMap.color_space = 0 -- None
 											nrmMap.rgbColorSpace = 3 -- Raw
 											nrmMapNode.NormalMap = nrmMap
@@ -528,9 +530,11 @@ rollout ReawoteMatLoader title
 											local dispMapPath = file
 											local dispMap = createVrayBitmapNode dispMapPath
 											dispMap.name = map
+											dispMap.color_space = 0 -- None
+											dispMap.rgbColorSpace = 3 -- Raw
 											materialToAssign.texmap_displacement_multiplier = 1.0
 											materialToAssign.texmap_displacement = dispMap
-											print(map)
+											-- print(map)
 										)
 									)
 									else if (map == "DISP16") and (loadDisp.checked == 1) then
@@ -539,10 +543,12 @@ rollout ReawoteMatLoader title
 										(
 											local dispMapPath = file
 											local dispMap = createVrayBitmapNode dispMapPath
-											dispMap.name = "DISP"
+											dispMap.name = map
+											dispMap.color_space = 0 -- None
+											dispMap.rgbColorSpace = 3 -- Raw
 											materialToAssign.texmap_displacement_multiplier = 1.0
 											materialToAssign.texmap_displacement = dispMap
-											print(map)
+											-- print(map)
 										)
 									)
 									else if map == "METAL" then
@@ -553,7 +559,7 @@ rollout ReawoteMatLoader title
 										metalnessMap.color_space = 0 -- None
 										metalnessMap.rgbColorSpace = 3 -- Raw
 										materialToAssign.texmap_metalness = metalnessMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "OPAC" then
 									(
@@ -563,7 +569,7 @@ rollout ReawoteMatLoader title
 										opacityColorMap.color_space = 0 -- None
 										opacityColorMap.rgbColorSpace = 3 -- Raw
 										materialToAssign.texmap_opacity = opacityColorMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "SSS" then
 									(
@@ -574,7 +580,7 @@ rollout ReawoteMatLoader title
 										sssMap.rgbColorSpace = 1
 										materialToAssign.translucency_on = 6
 										materialToAssign.texmap_translucent = sssMap
-										print(map)
+										-- print(map)
 									)
 									else if map == "SHEENGLOSS" then
 									(
@@ -584,7 +590,7 @@ rollout ReawoteMatLoader title
 										sheenglossMap.color_space = 0 -- None
 										sheenglossMap.rgbColorSpace = 3 -- Raw
 										materialToAssign.texmap_sheen_glossiness = sheenglossMap
-										print(map)
+										-- print(map)
 									)
 								)
 							)
@@ -592,7 +598,7 @@ rollout ReawoteMatLoader title
 					)
 				)
 				else(
-					print("Renderer nevybran")
+					-- print("Renderer nevybran")
 				)
 
 				if slotIndex <= meditMaterials.count then
@@ -603,7 +609,7 @@ rollout ReawoteMatLoader title
 				)
 				else
 				(
-					print "Ran out of Material Editor slots."
+					-- print "Ran out of Material Editor slots."
 					break -- Exit the loop if no more slots are available
 				)
 			)
@@ -665,7 +671,7 @@ rollout ReawoteMatLoader title
 	(
 		local additionalFolder = getSavePath() -- Get additional folder path
 		append allFolderPaths additionalFolder
-		print(allFolderPaths)
+		-- print(allFolderPaths)
 		if additionalFolder != undefined do
 		(
 			append folderPaths additionalFolder -- Append new folder to global list
