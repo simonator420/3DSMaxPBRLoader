@@ -3,11 +3,12 @@ renderEngines = #("Corona", "VRay")
 labelWidth = 100  -- Width of the labels
 fullWidthElement = 425  -- Width of the dropdown and the editText
 buttonWidth = 80  -- Width of the Browse button
+global ReawotePBRLoader
 global folderPaths = #()
 global allFolderPaths = #()
 
 
-rollout ReawoteMatLoader title
+rollout ReawotePBRLoader title
 (
     -- Label for Material Folder text
     label lblMaterialFolder "Material Folder" pos:[10,5] width:labelWidth
@@ -41,7 +42,7 @@ rollout ReawoteMatLoader title
 	
 	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:250
 	
-	on ReawoteMatLoader open do
+	on ReawotePBRLoader open do
     (
         -- Configuration for the ListView
         lvItems.View = lvItems.View.Details
@@ -55,6 +56,12 @@ rollout ReawoteMatLoader title
 		lvItems.columns.add("Check") checkColumnWidth
 		lvItems.columns.add("Name") nameColumnWidth
 
+		try (
+			d = (windows.getChildHWND 0 title)[1]
+			icon = dotnetobject "System.Drawing.Icon" ((getDir #userIcons) +"\\reawote.ico")
+			windows.SendMessage d 0x0080 0 icon.handle
+		) catch ()
+
     )
 
     -- Event handler for the Browse button
@@ -64,7 +71,6 @@ rollout ReawoteMatLoader title
         -- Code to handle the folder browsing and selection
         local selectedFolder = getSavePath()
 		-- Clear the existing items and folderPaths
-		append allFolderPaths selectedFolder
 		-- print(allFolderPaths)
 		lvItems.Items.Clear()
 		folderPaths = #()
@@ -72,58 +78,69 @@ rollout ReawoteMatLoader title
         (
 
 			initiallySelectedFolder = selectedFolder
-            -- Handle the selected folder
-            edtSelectedPath.text = selectedFolder
-            -- Handle the enabling
-			edtSelectedPath.enabled = true
-			ddlRenderer.enabled = true
-			loadAO.enabled = true
-			loadDisp.enabled = true
-			load16Nrm.enabled = true
-			load16Disp.enabled = true
-			btnLoadMaterials.enabled = true
-			btnSelectAll.enabled = true
-			btnRefresh.enabled = true
-			btnAddToQueue.enabled = true
-			btnClean.enabled = true
-
-			load16Disp.checked = true
-			loadDisp.checked = true
-			load16Nrm.checked = true
-			loadAO.checked = true
-
-			btnBrowse.enabled = false
-
 			
 			-- local allFiles = getFiles (selectedFolder + "\\*")
 			local allFolders = getDirectories (selectedFolder + "\\*")
+			local validSubfolderExists = false
 
-			-- -- print ("Files in " + selectedFolder + ":")
-			-- for file in allFiles do
-			-- (
-			-- 	-- print ("  File: " + (filenameFromPath file))
-			-- )
 
-			-- print ("Folders in " + selectedFolder + ":")
 			for folder in allFolders do
 			(
 				local folderName = filenameFromPath folder
-				local parts = filterString folderName "_"
-				local matName = if parts.count >= 3 then
-					(parts[1] + "_" + parts[2] + "_" + parts[3])
-				else
-					(folderName)  -- Fallback to the original folder name if not enough parts
-
-
-				-- print(parts)
-
-				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
-				mat.Checked = false
-				mat.SubItems.Add(matName)  -- Name of the material
-				lvItems.Items.Add(mat)
-				-- print ("  Folder: " + (filenameFromPath folder))
-				append folderPaths folder
+				local subfolders = getDirectories (folder + "\\*")
+				local validSubfolderFound = false
+			
+				for subfolder in subfolders do
+				(
+					print(subfolder)
+					local parts = filterString subfolder "\\"
+					arrLength = parts.count
+					desiredFolder = parts[arrLength]
+					local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+					if findItem folderEndings desiredFolder != 0 do
+					(
+						validSubfolderFound = true
+						validSubfolderExists = true
+						exit
+					)
+				)
+			
+				if validSubfolderFound do
+				(
+					local parts = filterString folderName "_"
+					local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+					local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+					mat.Checked = false
+					mat.SubItems.Add(matName)
+					lvItems.Items.Add(mat)
+					append folderPaths folder
+				)
 			)
+
+			if validSubfolderExists do
+			(
+				append allFolderPaths selectedFolder
+				edtSelectedPath.text = selectedFolder
+				-- Handle the enabling
+				edtSelectedPath.enabled = true
+				ddlRenderer.enabled = true
+				loadAO.enabled = true
+				loadDisp.enabled = true
+				load16Nrm.enabled = true
+				load16Disp.enabled = true
+				btnLoadMaterials.enabled = true
+				btnSelectAll.enabled = true
+				btnRefresh.enabled = true
+				btnAddToQueue.enabled = true
+				btnClean.enabled = true
+
+				load16Disp.checked = true
+				loadDisp.checked = true
+				load16Nrm.checked = true
+				loadAO.checked = true
+
+				btnBrowse.enabled = false
+			)			
         )
     )
 
@@ -670,25 +687,49 @@ rollout ReawoteMatLoader title
 	on btnAddToQueue pressed do
 	(
 		local additionalFolder = getSavePath() -- Get additional folder path
-		append allFolderPaths additionalFolder
 		-- print(allFolderPaths)
 		if additionalFolder != undefined do
 		(
-			append folderPaths additionalFolder -- Append new folder to global list
 			local allFolders = getDirectories (additionalFolder + "\\*")
+			local validSubfolderExists = false
 
 			-- Add new folders to ListView
 			for folder in allFolders do
 			(
 				local folderName = filenameFromPath folder
-				local parts = filterString folderName "_"
-				local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+				local subfolders = getDirectories (folder + "\\*")
+				local validSubfolderFound = false
 
-				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
-				mat.Checked = false
-				mat.SubItems.Add(matName)
-				lvItems.Items.Add(mat)
-				append folderPaths folder
+				for subfolder in subfolders do
+				(
+					local parts = filterString subfolder "\\"
+					arrLength = parts.count
+					desiredFolder = parts[arrLength]
+					local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+					if findItem folderEndings desiredFolder != 0 do
+					(
+						validSubfolderFound = true
+						validSubfolderExists = true
+						exit
+					)
+				)
+
+				if validSubfolderFound do
+				(
+					local parts = filterString folderName "_"
+					local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+
+					local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+					mat.Checked = false
+					mat.SubItems.Add(matName)
+					lvItems.Items.Add(mat)
+					append folderPaths folder
+				)
+			)
+
+			if validSubfolderExists do 
+			(
+				append allFolderPaths additionalFolder
 			)
 		)
 	)
@@ -738,4 +779,4 @@ rollout ReawoteMatLoader title
 )
 
 -- Display the rollout
-createdialog ReawoteMatLoader width:440 height: 510 
+createdialog ReawotePBRLoader width:440 height: 510 
