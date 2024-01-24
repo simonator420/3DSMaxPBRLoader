@@ -39,8 +39,52 @@ rollout ReawotePBRLoader title
 	button btnAddToQueue "Add To Queue" pos:[175, 205] width:buttonWidth enabled:false
 	button btnClean "Clean" pos:[260, 205] width:buttonWidth enabled:false
 
-	
 	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:250
+
+	dotNetControl imgDisplay "System.Windows.Forms.PictureBox" pos:[5, 500] width:76 height:76
+	label lblMatPreview "Material Preview" pos:[90, 532] width:315
+
+	on lvItems ItemCheck sender args do
+	(
+		local index = args.Index
+		local item = sender.Items.Item[index]
+		local itemName = item.SubItems.Item[1].Text
+		local clickedPath = folderPaths[index + 1]
+		print(clickedPath)
+	)
+
+	on lvItems MouseClick sender args do
+	(
+		local clickedItem = sender.GetItemAt(args.X) (args.Y)
+		local itemName = clickedItem.SubItems.Item[1].Text
+		local index = sender.Items.IndexOf(clickedItem)
+		-- print(itemName)
+		local clickedPath = folderPaths[index + 1]
+		local subfolders = getDirectories (clickedPath + "\\*")
+		for subfolder in subfolders do
+        (
+			-- print(subfolder)
+            local folderName = filenameFromPath(subfolder)
+			-- print(folderName)
+            if folderName == "PREVIEW\\" do
+            (
+                local files = getFiles (subfolder + "\\*")
+				for file in files do
+				(
+					local filename = filenameFromPath(file)
+					if (matchPattern filename pattern:"*SPHERE*") or (matchPattern filename pattern:"*FABRIC*") do
+					(
+						local filePath = file + "\\"
+						local image = dotNetObject "System.Drawing.Bitmap" file
+						imgDisplay.Image = image
+						imgDisplay.SizeMode = imgDisplay.SizeMode.StretchImage
+						lblMatPreview.text = itemName
+						print(itemName)
+					)
+				)
+			)
+        )
+	)
 	
 	on ReawotePBRLoader open do
     (
@@ -775,8 +819,14 @@ rollout ReawotePBRLoader title
 
 		-- Disable the dropdown
 		ddlRenderer.enabled = false
+
+		local whiteBitmap = dotNetObject "System.Drawing.Bitmap" 75 75
+		
+		imgDisplay.Image = whiteBitmap
+		imgDisplay.SizeMode = imgDisplay.SizeMode.StretchImage
+		lblMatPreview.text = "Material Preview"
 	)
 )
 
 -- Display the rollout
-createdialog ReawotePBRLoader width:440 height: 510 
+createdialog ReawotePBRLoader width:440 height: 595
