@@ -41,8 +41,8 @@ rollout ReawotePBRLoader title
 
 	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:250
 
-	dotNetControl imgDisplay "System.Windows.Forms.PictureBox" pos:[5, 500] width:76 height:76
-	label lblMatPreview "Material Preview" pos:[90, 532] width:315
+	dotNetControl imgDisplay "System.Windows.Forms.PictureBox" pos:[500, 500] width:76 height:76
+	label lblMatPreview "" pos:[90, 532] width:315
 
 	on lvItems ItemCheck sender args do
 	(
@@ -50,7 +50,7 @@ rollout ReawotePBRLoader title
 		local item = sender.Items.Item[index]
 		local itemName = item.SubItems.Item[1].Text
 		local clickedPath = folderPaths[index + 1]
-		print(clickedPath)
+		-- print(clickedPath)
 	)
 
 	on lvItems MouseClick sender args do
@@ -78,8 +78,9 @@ rollout ReawotePBRLoader title
 						local image = dotNetObject "System.Drawing.Bitmap" file
 						imgDisplay.Image = image
 						imgDisplay.SizeMode = imgDisplay.SizeMode.StretchImage
+						imgDisplay.pos = [5, 500]
 						lblMatPreview.text = itemName
-						print(itemName)
+						-- print(itemName)
 					)
 				)
 			)
@@ -102,9 +103,12 @@ rollout ReawotePBRLoader title
 
 		try (
 			d = (windows.getChildHWND 0 title)[1]
-			icon = dotnetobject "System.Drawing.Icon" ((getDir #userIcons) +"\\reawote.ico")
+			icon = dotnetobject "System.Drawing.Icon" ((getDir #usericons) +"\\reawote_icon.ico")
+			print(icon)
 			windows.SendMessage d 0x0080 0 icon.handle
-		) catch ()
+		) catch (
+			print "Error setting icon."
+		)
 
     )
 
@@ -136,7 +140,7 @@ rollout ReawotePBRLoader title
 			
 				for subfolder in subfolders do
 				(
-					print(subfolder)
+					-- print(subfolder)
 					local parts = filterString subfolder "\\"
 					arrLength = parts.count
 					desiredFolder = parts[arrLength]
@@ -824,7 +828,8 @@ rollout ReawotePBRLoader title
 		
 		imgDisplay.Image = whiteBitmap
 		imgDisplay.SizeMode = imgDisplay.SizeMode.StretchImage
-		lblMatPreview.text = "Material Preview"
+		imgDisplay.pos = [500, 500]
+		lblMatPreview.text = ""
 	)
 )
 
