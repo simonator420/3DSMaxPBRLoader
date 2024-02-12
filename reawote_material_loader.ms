@@ -555,6 +555,8 @@ rollout ReawotePBRLoader title
 										glossMap.name = map
 										glossMap.color_space = 0 -- None
 										glossMap.rgbColorSpace = 3 -- Raw
+										glossMap.gamma = 0.7
+										glossMap.type = 1
 										materialToAssign.Reflection = white
 										materialToAssign.texmap_reflectionGlossiness = glossMap
 									)
@@ -623,6 +625,8 @@ rollout ReawotePBRLoader title
 										metalnessMap.name = map
 										metalnessMap.color_space = 0 -- None
 										metalnessMap.rgbColorSpace = 3 -- Raw
+										metalnessMap.gamma = 0.7
+										metalnessMap.type = 1
 										materialToAssign.texmap_metalness = metalnessMap
 										-- print(map)
 									)
