@@ -242,7 +242,7 @@ rollout ReawotePBRLoader title
 				local subfolders = getDirectories (actualFolderPath + "\\*")
 
 				-- Switch renderer to Corona if it's selected
-				if selectedRenderer == "Corona" then  -- Assuming 'Corona' is the first item in ddlRenderer
+				if selectedRenderer == "Corona" then
 				(
 					local materialName = mat.SubItems.Item[1].Text
 					renderers.current = Corona()
@@ -469,8 +469,38 @@ rollout ReawotePBRLoader title
 				-- Switch renderer to VRay if it's selected
 				else if selectedRenderer == "VRay" then
 				(
-					-- TODO Make it so it takes all versions of VRAy
-					renderers.current = V_Ray_6__update_2()
+					vrayRenderers = #()
+
+					-- Iterate over all available renderers
+					for rendererClass in RendererClass.classes do (
+						-- Get the renderer's name as a string
+						rendererName = rendererClass as string
+						-- Check if the renderer's name starts with any of the specified prefixes
+						-- Included future versions
+						if (matchPattern rendererName pattern:"V_Ray_6*" ignoreCase:true) or
+						(matchPattern rendererName pattern:"V_Ray_7*" ignoreCase:true) or
+						-- (matchPattern rendererName pattern:"V_Ray_*" ignoreCase:true) or
+						(matchPattern rendererName pattern:"V_Ray_8*" ignoreCase:true) then (
+							append vrayRenderers rendererClass
+						)
+					)
+
+					if vrayRenderers.count > 0 then (
+					-- Assume the first one is the highest
+					highestVersionRenderer = vrayRenderers[1]
+
+					-- Iterate over the list to find the highest version
+					for rendererClass in vrayRenderers do (
+						if (getFilenameFile (rendererClass as string)) > (getFilenameFile (highestVersionRenderer as string)) then (
+							highestVersionRenderer = rendererClass
+						)
+					)
+						-- Set the highest version renderer as the current renderer
+						renderers.current = highestVersionRenderer()
+					) else (
+						print "No matching V-Ray renderer versions found."
+					)
+
 					-- print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
 					local materialName = mat.SubItems.Item[1].Text
 					local materialToAssign  = VRayMtl ()
