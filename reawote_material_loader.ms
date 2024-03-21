@@ -268,14 +268,19 @@ rollout ReawotePBRLoader title
 								local mapsList = #()
 								for file in filesInSubfolder do
 								(
+									local validMapTypes = #("COL", "AO", "GLOSS", "NRM", "NRM16", "DISP", "DISP16", "METAL", "OPAC", "SSS", "SHEENGLOSS")
 									local matParts = filterString file "\\"
 									local matPartsLength = matParts.count
 									local fileName = matParts[matPartsLength]
 
 									local fileNameParts = filterString fileName "_"
 									local fileNamePartsLength = fileNameParts.count
-									local map = fileNameParts[fileNamePartsLength-1]
-									append mapsList map
+									if fileNamePartsLength > 1 do (
+										local map = fileNameParts[fileNamePartsLength-1]
+										if findItem validMapTypes map > 0 then (
+											append mapsList map
+											)
+										)
 								)
 								
 								-- print(mapsList)
@@ -289,7 +294,9 @@ rollout ReawotePBRLoader title
 
 									local fileNameParts = filterString fileName "_"
 									local fileNamePartsLength = fileNameParts.count
-									local map = fileNameParts[fileNamePartsLength-1]
+									if fileNamePartsLength > 1 do (
+										local map = fileNameParts[fileNamePartsLength-1]
+										)
 
 									-- print(fileName)
 									if map == "COL" then
@@ -489,14 +496,21 @@ rollout ReawotePBRLoader title
 								local mapsList = #()
 								for file in filesInSubfolder do
 								(
+									local validMapTypes = #("COL", "AO", "GLOSS", "NRM", "NRM16", "DISP", "DISP16", "METAL", "OPAC", "SSS", "SHEENGLOSS")
 									local matParts = filterString file "\\"
 									local matPartsLength = matParts.count
 									local fileName = matParts[matPartsLength]
 
 									local fileNameParts = filterString fileName "_"
 									local fileNamePartsLength = fileNameParts.count
-									local map = fileNameParts[fileNamePartsLength-1]
-									append mapsList map
+									if fileNamePartsLength > 1 do (
+										local map = fileNameParts[fileNamePartsLength-1]
+										
+										-- Check if 'map' is in the list of valid map types
+										if findItem validMapTypes map > 0 then (
+											append mapsList map
+											)
+										)
 								)
 								
 								-- print(mapsList)
@@ -510,7 +524,9 @@ rollout ReawotePBRLoader title
 
 									local fileNameParts = filterString fileName "_"
 									local fileNamePartsLength = fileNameParts.count
-									local map = fileNameParts[fileNamePartsLength-1]
+									if fileNamePartsLength > 1 do (
+										local map = fileNameParts[fileNamePartsLength-1]
+										)
 
 									-- print(fileName)
 									if map == "COL" then
