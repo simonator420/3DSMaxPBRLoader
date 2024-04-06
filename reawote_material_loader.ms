@@ -496,7 +496,9 @@ rollout ReawotePBRLoader title
 						)
 					)
 						-- Set the highest version renderer as the current renderer
+					if not matchPattern (renderers.current as string) pattern:"V_Ray*" ignoreCase:true then (
 						renderers.current = highestVersionRenderer()
+					)
 					) else (
 						print "No matching V-Ray renderer versions found."
 					)
