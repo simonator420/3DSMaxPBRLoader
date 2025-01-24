@@ -24,6 +24,8 @@ buttonWidth = 80  -- Width of the Browse button
 global ReawotePBRLoader
 global folderPaths = #()
 global allFolderPaths = #()
+global hdriPaths = #()
+global allHDRIPaths = #()
 
 
 rollout ReawotePBRLoader title
@@ -34,33 +36,40 @@ rollout ReawotePBRLoader title
     -- Browse button
     button btnBrowse "Browse" pos:[350,5] width:buttonWidth
 
+	-- Label for Material Folder text
+    label lblHDRIFolder "HDRI Folder" pos:[10,30] width:labelWidth
+
+    -- Browse button
+    button btnBrowseHDRI "Browse HDRI" pos:[350,30] width:buttonWidth
+
     -- Label for Select Renderer text
-    label lblSelectRenderer "Select Renderer" pos:[10,30] width:labelWidth
+    label lblSelectRenderer "Select Renderer" pos:[10,55] width:labelWidth
 
     -- ComboBox for renderer selection
-    dropdownlist ddlRenderer items:renderEngines pos:[350,30] width:buttonWidth enabled:false
+    dropdownlist ddlRenderer items:renderEngines pos:[350,55] width:buttonWidth enabled:false
 
     -- EditText for displaying selected path
-    edittext edtSelectedPath "" pos:[5,60] width:fullWidthElement enabled:false
+    edittext edtSelectedPath "" pos:[5,85] width:fullWidthElement enabled:false
 	
 	-- Checkboxes for custom loading
-	checkbox loadAO "Include ambient occlusion (AO) maps" checked:False pos:[7.5, 90] enabled:false
-	checkbox loadDisp "Include displacement maps" checked:False pos:[7.5, 110] enabled:false
-	checkbox load16Disp "Use 16 bit displacement maps (when available)" checked:False pos:[7.5, 130] enabled:false
-	checkbox load16Nrm "Use 16 bit normal maps (when available)" checked:False pos:[7.5, 150] enabled:false
+	checkbox loadAO "Include ambient occlusion (AO) maps" checked:False pos:[7.5, 115] enabled:false
+	checkbox loadDisp "Include displacement maps" checked:False pos:[7.5, 135] enabled:false
+	checkbox load16Disp "Use 16 bit displacement maps (when available)" checked:False pos:[7.5, 155] enabled:false
+	checkbox load16Nrm "Use 16 bit normal maps (when available)" checked:False pos:[7.5, 175] enabled:false
 	
 	-- Button for loading materials
-	button btnLoadMaterials "Load selected materials" pos:[5, 175] width:fullWidthElement enabled:false
+	button btnLoadMaterials "Load selected materials" pos:[5, 200] width:fullWidthElement enabled:false
+	button btnLoadHDRI "Load HDRI" pos:[5, 230] width:fullWidthElement enabled:false
 	
-	button btnSelectAll "Select All" pos:[5, 205] width:buttonWidth enabled:false
-	button btnRefresh "Refresh" pos:[90, 205] width:buttonWidth enabled:false
-	button btnAddToQueue "Add To Queue" pos:[175, 205] width:buttonWidth enabled:false
-	button btnClean "Clean" pos:[260, 205] width:buttonWidth enabled:false
+	button btnSelectAll "Select All" pos:[5, 260] width:buttonWidth enabled:false
+	button btnRefresh "Refresh" pos:[90, 260] width:buttonWidth enabled:false
+	button btnAddToQueue "Add To Queue" pos:[175, 260] width:buttonWidth enabled:false
+	button btnClean "Clean" pos:[260, 260] width:buttonWidth enabled:false
 
-	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 235] width:fullWidthElement height:250
+	dotNetControl lvItems "System.Windows.Forms.ListView" pos:[5, 290] width:fullWidthElement height:250
 
-	dotNetControl imgDisplay "System.Windows.Forms.PictureBox" pos:[500, 500] width:76 height:76
-	label lblMatPreview "" pos:[90, 532] width:315
+	dotNetControl imgDisplay "System.Windows.Forms.PictureBox" pos:[500, 555] width:76 height:76
+	label lblMatPreview "" pos:[90, 587] width:315
 
 	on lvItems ItemCheck sender args do
 	(
@@ -77,26 +86,33 @@ rollout ReawotePBRLoader title
 		local itemName = clickedItem.SubItems.Item[1].Text
 		local index = sender.Items.IndexOf(clickedItem)
 		-- print(itemName)
-		local clickedPath = folderPaths[index + 1]
+		if allFolderPaths.count > 0 do
+		(
+			local clickedPath = folderPaths[index + 1]
+		)
+		if allHDRIPaths.count > 0 do
+		(
+			local clickedPath = hdriPaths[index + 1]
+		)
 		local subfolders = getDirectories (clickedPath + "\\*")
 		for subfolder in subfolders do
         (
 			-- print(subfolder)
             local folderName = filenameFromPath(subfolder)
 			-- print(folderName)
-            if folderName == "PREVIEW\\" do
+            if (folderName == "PREVIEW\\") or (folderName == "PREVIEWS\\") do
             (
                 local files = getFiles (subfolder + "\\*")
 				for file in files do
 				(
 					local filename = filenameFromPath(file)
-					if (matchPattern filename pattern:"*SPHERE*") or (matchPattern filename pattern:"*FABRIC*") do
+					if (matchPattern filename pattern:"*SPHERE*") or (matchPattern filename pattern:"*FABRIC*") or (matchPattern filename pattern:"*PLANE*") do
 					(
 						local filePath = file + "\\"
 						local image = dotNetObject "System.Drawing.Bitmap" file
 						imgDisplay.Image = image
 						imgDisplay.SizeMode = imgDisplay.SizeMode.StretchImage
-						imgDisplay.pos = [5, 500]
+						imgDisplay.pos = [5, 550]
 						lblMatPreview.text = itemName
 						-- print(itemName)
 					)
@@ -130,6 +146,78 @@ rollout ReawotePBRLoader title
 
     )
 
+	-- Event handler for the Browse button
+    on btnBrowseHDRI pressed do
+	(
+		local selectedFolder = getSavePath()
+		lvItems.Items.Clear()
+		hdriPaths = #()
+		if selectedFolder != undefined do
+		(
+			initiallySelectedFolder = selectedFolder
+			
+			-- Get all subdirectories in the selected folder
+			local allFolders = getDirectories (selectedFolder + "\\*")
+			local validHDRIFolderExists = false
+
+			for folder in allFolders do
+			(
+				local folderName = filenameFromPath folder
+				local subfolders = getDirectories (folder + "\\*")
+				local validHDRIFolderFound = false
+
+				for subfolder in subfolders do
+				(
+					local parts = filterString subfolder "\\"
+					arrLength = parts.count
+					desiredFolder = parts[arrLength]
+					local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+					if findItem folderEndings desiredFolder != 0 do
+					(
+						-- Check for .hdr files in the subfolder
+						local hdrFiles = getFiles (subfolder + "\\*.hdr")
+						if hdrFiles.count > 0 do
+						(
+							print("Valid HDRI folder found with .hdr file: " + folder)
+							validHDRIFolderFound = true
+							validHDRIFolderExists = true
+							exit
+						)
+					)
+				)
+
+				if validHDRIFolderFound do
+				(
+					local parts = filterString folderName "_"
+					local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+					
+					local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+					mat.Checked = false
+					mat.SubItems.Add(matName)
+					lvItems.Items.Add(mat)
+					append hdriPaths folder
+				)
+			)
+
+			if validHDRIFolderExists do
+			(
+				append allHDRIPaths selectedFolder
+				edtSelectedPath.text = selectedFolder
+				print("These are all the HDRI paths: " + (allHDRIPaths as string))
+				print("These are all the HDRI paths: " + (hdriPaths as string))
+				edtSelectedPath.enabled = true
+				btnLoadHDRI.enabled = true
+				btnBrowseHDRI.enabled = false
+				btnBrowse.enabled = false
+				btnSelectAll.enabled = true
+				btnRefresh.enabled = true
+				btnAddToQueue.enabled = true
+				btnClean.enabled = true
+				ddlRenderer.enabled = true
+			)
+		)
+	)
+
     -- Event handler for the Browse button
     on btnBrowse pressed do
     (
@@ -142,7 +230,6 @@ rollout ReawotePBRLoader title
 		folderPaths = #()
         if selectedFolder != undefined do
         (
-
 			initiallySelectedFolder = selectedFolder
 			
 			-- local allFiles = getFiles (selectedFolder + "\\*")
@@ -165,9 +252,14 @@ rollout ReawotePBRLoader title
 					local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
 					if findItem folderEndings desiredFolder != 0 do
 					(
-						validSubfolderFound = true
-						validSubfolderExists = true
-						exit
+						local hdrFiles = getFiles (subfolder + "\\*.hdr")
+						if hdrFiles.count == 0 do
+						(
+							print("Folder ending found: " + folderName)
+							validSubfolderFound = true
+							validSubfolderExists = true
+							exit
+						)
 					)
 				)
 			
@@ -194,7 +286,7 @@ rollout ReawotePBRLoader title
 				loadDisp.enabled = true
 				load16Nrm.enabled = true
 				load16Disp.enabled = true
-				btnLoadMaterials.enabled = true
+				btnLoadMaterials.enabled = true		
 				btnSelectAll.enabled = true
 				btnRefresh.enabled = true
 				btnAddToQueue.enabled = true
@@ -206,6 +298,8 @@ rollout ReawotePBRLoader title
 				loadAO.checked = true
 
 				btnBrowse.enabled = false
+				btnBrowseHDRI.enabled = false
+				btnLoadHDRI.enabled = false
 			)			
         )
     )
@@ -222,6 +316,149 @@ rollout ReawotePBRLoader title
 		vrayNode.filename = filePath
 		return vrayNode
 	)
+
+	on btnLoadHDRI pressed do
+    (
+		-- Check the selected renderer
+		local selectedRenderer = ddlRenderer.selected
+		local slotIndex = 1 -- Start from the first slot
+        -- Iterate through all materials in the ListView
+		for i = 1 to lvItems.Items.Count do
+		(
+			local mat = lvItems.Items.Item[i-1]
+
+			-- Check if the material is selected
+			if mat.Checked then
+			(
+				local actualFolderPath = hdriPaths[i]
+				local subfolders = getDirectories (actualFolderPath + "\\*")
+
+				-- Switch renderer to Corona if it's selected
+				if selectedRenderer == "Corona" then
+				(
+					local materialName = mat.SubItems.Item[1].Text
+					renderers.current = Corona()
+					local materialToAssign  = CoronaSky ()
+					materialToAssign.name = materialName
+
+					-- -- print out all subfolders of the actual material folder
+					if subfolders.count > 0 then
+					(
+						-- print ("Subfolders in " + actualFolderPath + ":")
+						for subfolder in subfolders do
+						(
+							-- print ("  Subfolder: " + (filenameFromPath subfolder))
+							local parts = filterString subfolder "\\"
+							arrLength = parts.count
+							desiredFolder = parts[arrLength]
+							local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+							-- print(desiredFolder)
+							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
+							(
+								print("Valid HDRI folder found: " + actualFolderPath)
+							)
+						)
+					)
+					else
+					(
+						-- print ("No subfolders in " + actualFolderPath)
+					)
+					-- print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
+				)
+
+				-- Switch renderer to VRay if it's selected
+				else if selectedRenderer == "VRay" then
+				(
+					vrayRenderers = #()
+
+					-- Iterate over all available renderers
+					for rendererClass in RendererClass.classes do (
+						-- Get the renderer's name as a string
+						rendererName = rendererClass as string
+						-- Check if the renderer's name starts with any of the specified prefixes
+						-- Included future versions
+						if (matchPattern rendererName pattern:"V_Ray_6*" ignoreCase:true) or
+						(matchPattern rendererName pattern:"V_Ray_7*" ignoreCase:true) or
+						-- (matchPattern rendererName pattern:"V_Ray_*" ignoreCase:true) or
+						(matchPattern rendererName pattern:"V_Ray_8*" ignoreCase:true) then (
+							append vrayRenderers rendererClass
+						)
+					)
+
+					if vrayRenderers.count > 0 then (
+					-- Assume the first one is the highest
+					highestVersionRenderer = vrayRenderers[1]
+
+					-- Iterate over the list to find the highest version
+					for rendererClass in vrayRenderers do (
+						if (getFilenameFile (rendererClass as string)) > (getFilenameFile (highestVersionRenderer as string)) then (
+							highestVersionRenderer = rendererClass
+						)
+					)
+						-- Set the highest version renderer as the current renderer
+					if not matchPattern (renderers.current as string) pattern:"V_Ray*" ignoreCase:true then (
+						renderers.current = highestVersionRenderer()
+					)
+					) else (
+						print "No matching V-Ray renderer versions found."
+					)
+
+					-- print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
+					local materialName = mat.SubItems.Item[1].Text
+					local materialToAssign  = VRayLight ()
+					materialToAssign.name = materialName
+					materialToAssign.type = 1
+
+					local actualFolderPath = hdriPaths[i]
+					local subfolders = getDirectories (actualFolderPath + "\\*")
+					-- -- print out all subfolders of the actual material folder
+					if subfolders.count > 0 then
+					(
+						-- print ("Subfolders in " + actualFolderPath + ":")
+						for subfolder in subfolders do
+						(
+							-- print ("  Subfolder: " + (filenameFromPath subfolder))
+							local parts = filterString subfolder "\\"
+							arrLength = parts.count
+							desiredFolder = parts[arrLength]
+							local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+							-- print(desiredFolder)
+							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
+							(
+								local hdrFiles = getFiles (subfolder + "\\*.hdr")
+								if hdrFiles.count > 0 do
+								(
+									print("Valid HDRI folder found with .hdr file: " + hdrFiles[1])
+									local vrayBitmapNode = createVrayBitmapNode hdrFiles[1]
+									vrayBitmapNode.name = materialName
+									materialToAssign.map = vrayBitmapNode
+									exit
+								)
+							)
+						)
+					)
+				)
+
+				else
+				(
+					-- print("Renderer nevybran")
+				)
+
+				-- if slotIndex <= meditMaterials.count then
+				-- (
+				-- 	meditMaterials[slotIndex] = materialToAssign
+				-- 	format "Assigned material to Material Editor slot: %\n" slotIndex
+				-- 	slotIndex += 1 -- Increment slot index for the next material
+				-- )
+				-- else
+				-- (
+				 	-- print "Ran out of Material Editor slots."
+				-- 	break -- Exit the loop if no more slots are available
+				-- )
+			)
+		)
+    )
+
 
 	
 	-- Event handler for the Load Materials button
@@ -778,76 +1015,242 @@ rollout ReawotePBRLoader title
 	on btnRefresh pressed do
 	(
 		lvItems.Items.Clear() -- Clear existing items in the ListView
+		print("Tohle jsou folderPaths: " + (folderPaths as string))
+	
 
-		-- Iterate through all folders in allFolderPaths and their subfolders
-		for folder in allFolderPaths do
+		-- Refresh Material Folders
+		if allFolderPaths.count > 0 do
 		(
-			local allSubFolders = getDirectories (folder + "\\*")
-
-			for subFolder in allSubFolders do
+			folderPaths = #()
+			for folder in allFolderPaths do
 			(
-				local folderName = filenameFromPath subFolder
-				local parts = filterString folderName "_"
-				local matName = if parts.count >= 3 then
-					(parts[1] + "_" + parts[2] + "_" + parts[3])
-				else
-					(folderName)  -- Fallback to the original folder name if not enough parts
+				local allSubFolders = getDirectories (folder + "\\*")
 
-				local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
-				mat.Checked = false
-				mat.SubItems.Add(matName)  -- Name of the material
-				lvItems.Items.Add(mat)
+				for folder in allSubFolders do
+				(
+					print("Checking folder: " + folder)
+					local folderName = filenameFromPath folder
+					local subfolders = getDirectories (folder + "\\*")
+
+					for subFolder in subfolders do
+					(
+						print("Checking Subfolder: " + subFolder)
+					
+						local parts = filterString subfolder "\\"
+						arrLength = parts.count
+						desiredFolder = parts[arrLength]
+						local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+						if findItem folderEndings desiredFolder != 0 do
+						(
+							local hdrFiles = getFiles (subfolder + "\\*.hdr")
+							if hdrFiles.count == 0 do
+							(
+								print("Valid material subfolder found: " + subFolder)
+								local parts = filterString folderName "_"
+								local matName = if parts.count >= 3 then
+									(parts[1] + "_" + parts[2] + "_" + parts[3])
+								else
+									(folderName) -- Fallback to the original folder name if not enough parts
+
+								local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+								mat.Checked = false
+								mat.SubItems.Add(matName) -- Name of the material
+								lvItems.Items.Add(mat)
+								append folderPaths folder
+							)
+						)
+					)
+				)
 			)
 		)
+
+		if allHDRIPaths.count > 0 do
+		(
+			hdriPaths = #()
+			for folder in allHDRIPaths do
+			(
+				local allSubFolders = getDirectories (folder + "\\*")
+
+				for folder in allSubFolders do
+				(
+					print("Checking folder: " + folder)
+					local folderName = filenameFromPath folder
+					local subfolders = getDirectories (folder + "\\*")
+
+					for subFolder in subfolders do
+					(
+						print("Checking Subfolder: " + subFolder)
+					
+						local parts = filterString subfolder "\\"
+						arrLength = parts.count
+						desiredFolder = parts[arrLength]
+						local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+						if findItem folderEndings desiredFolder != 0 do
+						(
+							local hdrFiles = getFiles (subfolder + "\\*.hdr")
+							if hdrFiles.count != 0 do
+							(
+								print("Valid material subfolder found: " + subFolder)
+								local parts = filterString folderName "_"
+								local matName = if parts.count >= 3 then
+									(parts[1] + "_" + parts[2] + "_" + parts[3])
+								else
+									(folderName) -- Fallback to the original folder name if not enough parts
+
+								local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+								mat.Checked = false
+								mat.SubItems.Add(matName) -- Name of the material
+								lvItems.Items.Add(mat)
+								append hdriPaths folder
+							)
+						)
+					)
+				)
+			)
+		)
+
+		-- Refresh HDRI Folders
+		if allHDRIPaths.count > 0 do
+		(
+			for folder in allHDRIPaths do
+			(
+				local allSubFolders = getDirectories (folder + "\\*")
+
+				for subFolder in allSubFolders do
+				(
+					print("Checking Subfolder: " + subFolder)
+					local folderName = filenameFromPath subFolder
+					local subfolderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+					if findItem subfolderEndings folderName != 0 do
+					(
+						local hdrFiles = getFiles (subFolder + "\\*.hdr")
+						if hdrFiles.count > 0 do
+						(
+							print("Valid HDRI subfolder found with .hdr file: " + subFolder)
+							local parts = filterString folderName "_"
+							local hdrName = if parts.count >= 3 then
+								(parts[1] + "_" + parts[2] + "_" + parts[3])
+							else
+								(folderName) -- Fallback to the original folder name if not enough parts
+
+							local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+							mat.Checked = false
+							mat.SubItems.Add(hdrName) -- Name of the HDRI
+							lvItems.Items.Add(mat)
+						)
+					)
+				)
+			)
+		)
+
+		print "Refresh completed for materials and HDRIs."
 	)
 
 
 	on btnAddToQueue pressed do
 	(
-		local additionalFolder = getSavePath() -- Get additional folder path
-		-- print(allFolderPaths)
+		local additionalFolder = getSavePath() -- Get the folder path from the user
 		if additionalFolder != undefined do
 		(
-			local allFolders = getDirectories (additionalFolder + "\\*")
-			local validSubfolderExists = false
-
-			-- Add new folders to ListView
-			for folder in allFolders do
+			-- Process material folders if allFolderPaths is not empty
+			if allFolderPaths.count > 0 do
 			(
-				local folderName = filenameFromPath folder
-				local subfolders = getDirectories (folder + "\\*")
-				local validSubfolderFound = false
+				local allFolders = getDirectories (additionalFolder + "\\*")
+				local validSubfolderExists = false
 
-				for subfolder in subfolders do
+				for folder in allFolders do
 				(
-					local parts = filterString subfolder "\\"
-					arrLength = parts.count
-					desiredFolder = parts[arrLength]
-					local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
-					if findItem folderEndings desiredFolder != 0 do
+					local folderName = filenameFromPath folder
+					local subfolders = getDirectories (folder + "\\*")
+					local validSubfolderFound = false
+
+					for subfolder in subfolders do
 					(
-						validSubfolderFound = true
-						validSubfolderExists = true
-						exit
+						local parts = filterString subfolder "\\"
+						arrLength = parts.count
+						desiredFolder = parts[arrLength]
+						local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+						if findItem folderEndings desiredFolder != 0 do
+						(
+							local hdrFiles = getFiles (subfolder + "\\*.hdr")
+							if hdrFiles.count == 0 do
+							(
+								print("Folder ending found: " + folderName)
+								validSubfolderFound = true
+								validSubfolderExists = true
+								exit
+							)
+						)
+					)
+
+					if validSubfolderFound do
+					(
+						local parts = filterString folderName "_"
+						local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+
+						local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+						mat.Checked = false
+						mat.SubItems.Add(matName)
+						lvItems.Items.Add(mat)
+						append folderPaths folder
 					)
 				)
 
-				if validSubfolderFound do
+				if validSubfolderExists do
 				(
-					local parts = filterString folderName "_"
-					local matName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
-
-					local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
-					mat.Checked = false
-					mat.SubItems.Add(matName)
-					lvItems.Items.Add(mat)
-					append folderPaths folder
+					append allFolderPaths additionalFolder
+					print "Material folders successfully added to the queue."
 				)
 			)
 
-			if validSubfolderExists do 
+			-- Process HDRI folders if allHDRIPaths is not empty
+			if allHDRIPaths.count > 0 do
 			(
-				append allFolderPaths additionalFolder
+				local allFolders = getDirectories (additionalFolder + "\\*")
+				local validHDRIFolderExists = false
+
+				for folder in allFolders do
+				(
+					local folderName = filenameFromPath folder
+					local subfolders = getDirectories (folder + "\\*")
+					local validHDRIFolderFound = false
+
+					for subfolder in subfolders do
+					(
+						local parts = filterString subfolder "\\"
+						arrLength = parts.count
+						desiredFolder = parts[arrLength]
+						local folderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
+						if findItem folderEndings desiredFolder != 0 do
+						(
+							local hdrFiles = getFiles (subfolder + "\\*.hdr")
+							if hdrFiles.count > 0 do
+							(
+								validHDRIFolderFound = true
+								validHDRIFolderExists = true
+								exit
+							)
+						)
+					)
+
+					if validHDRIFolderFound do
+					(
+						local parts = filterString folderName "_"
+						local hdrName = if parts.count >= 3 then (parts[1] + "_" + parts[2] + "_" + parts[3]) else (folderName)
+
+						local mat = dotNetObject "System.Windows.Forms.ListViewItem" ""
+						mat.Checked = false
+						mat.SubItems.Add(hdrName)
+						lvItems.Items.Add(mat)
+						append hdriPaths folder
+					)
+				)
+
+				if validHDRIFolderExists do
+				(
+					append allHDRIPaths additionalFolder
+					print "HDRI folders successfully added to the queue."
+				)
 			)
 		)
 	)
@@ -870,6 +1273,11 @@ rollout ReawotePBRLoader title
 		allFolderPaths = #()
 		btnBrowse.enabled = true
 
+		-- Reset the HDRI items
+		hdriPaths = #()
+		allHDRIPaths = #()
+		btnBrowseHDRI.enabled = true
+
 		-- Reset the EditText for displaying selected path
 		edtSelectedPath.text = ""
 		edtSelectedPath.enabled = false
@@ -886,6 +1294,7 @@ rollout ReawotePBRLoader title
 
 		-- Disable the buttons
 		btnLoadMaterials.enabled = false
+		btnLoadHDRI.enabled = false
 		btnSelectAll.enabled = false
 		btnRefresh.enabled = false
 		btnAddToQueue.enabled = false
@@ -904,4 +1313,4 @@ rollout ReawotePBRLoader title
 )
 
 -- Display the rollout
-createdialog ReawotePBRLoader width:440 height: 595
+createdialog ReawotePBRLoader width:440 height: 635
