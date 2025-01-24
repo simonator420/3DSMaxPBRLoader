@@ -338,6 +338,11 @@ rollout ReawotePBRLoader title
 				(
 					local materialName = mat.SubItems.Item[1].Text
 					renderers.current = Corona()
+					if not isKindOf renderers.current CoronaRenderer do
+					(
+						messageBox "Corona Renderer is not installed or not available." title:"Error"
+						return None
+					)
 					local materialToAssign  = CoronaSky ()
 					materialToAssign.name = materialName
 
@@ -359,9 +364,17 @@ rollout ReawotePBRLoader title
 							)
 						)
 					)
+
+					if slotIndex <= meditMaterials.count then
+					(
+						meditMaterials[slotIndex] = materialToAssign
+						format "Assigned material to Material Editor slot: %\n" slotIndex
+						slotIndex += 1 -- Increment slot index for the next material
+					)
 					else
 					(
-						-- print ("No subfolders in " + actualFolderPath)
+						-- print "Ran out of Material Editor slots."
+						break -- Exit the loop if no more slots are available
 					)
 					-- print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
 				)
@@ -400,7 +413,8 @@ rollout ReawotePBRLoader title
 						renderers.current = highestVersionRenderer()
 					)
 					) else (
-						print "No matching V-Ray renderer versions found."
+						messageBox "VRay is not installed or not available." title:"Error"
+						return None
 					)
 
 					-- print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
@@ -443,18 +457,6 @@ rollout ReawotePBRLoader title
 				(
 					-- print("Renderer nevybran")
 				)
-
-				-- if slotIndex <= meditMaterials.count then
-				-- (
-				-- 	meditMaterials[slotIndex] = materialToAssign
-				-- 	format "Assigned material to Material Editor slot: %\n" slotIndex
-				-- 	slotIndex += 1 -- Increment slot index for the next material
-				-- )
-				-- else
-				-- (
-				 	-- print "Ran out of Material Editor slots."
-				-- 	break -- Exit the loop if no more slots are available
-				-- )
 			)
 		)
     )
@@ -483,6 +485,11 @@ rollout ReawotePBRLoader title
 				(
 					local materialName = mat.SubItems.Item[1].Text
 					renderers.current = Corona()
+					if not isKindOf renderers.current CoronaRenderer do
+					(
+						messageBox "Corona Renderer is not installed or not available." title:"Error"
+						return None
+					)
 					local materialToAssign  = CoronaPhysicalMtl ()
 					materialToAssign.name = materialName
 					materialToAssign.roughnessMode = 1
@@ -737,7 +744,8 @@ rollout ReawotePBRLoader title
 						renderers.current = highestVersionRenderer()
 					)
 					) else (
-						print "No matching V-Ray renderer versions found."
+						messageBox "VRay is not installed or not available." title:"Error"
+						return None
 					)
 
 					-- print ("Switching to VRay Renderer for material: " + mat.SubItems.Item[1].Text)
