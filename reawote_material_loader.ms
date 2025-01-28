@@ -336,6 +336,7 @@ rollout ReawotePBRLoader title
 				-- Switch renderer to Corona if it's selected
 				if selectedRenderer == "Corona" then
 				(
+					local coronaBitmapNode = CoronaBitmap ()
 					local materialName = mat.SubItems.Item[1].Text
 					renderers.current = Corona()
 					if not isKindOf renderers.current CoronaRenderer do
@@ -343,9 +344,6 @@ rollout ReawotePBRLoader title
 						messageBox "Corona Renderer is not installed or not available." title:"Error"
 						return None
 					)
-					local materialToAssign  = CoronaSky ()
-					materialToAssign.name = materialName
-
 					-- -- print out all subfolders of the actual material folder
 					if subfolders.count > 0 then
 					(
@@ -360,22 +358,40 @@ rollout ReawotePBRLoader title
 							-- print(desiredFolder)
 							if findItem folderEndings desiredFolder != 0 then  -- Added check for folderEndings
 							(
-								print("Valid HDRI folder found: " + actualFolderPath)
+								local hdrFiles = getFiles (subfolder + "\\*.hdr")
+								if hdrFiles.count > 0 then
+								(
+									local hdrFilePath = hdrFiles[1] -- Use the first HDR file found
+									print ("Creating Corona Bitmap for: " + hdrFilePath)
+									
+									-- Create the Corona Bitmap node
+									coronaBitmapNode.filename = hdrFilePath
+									local coronaBitmapNode = createCoronaBitmapNode hdrFilePath
+									coronaBitmapNode.name = materialName
+									print ("HDRI added to scene materials: " + coronaBitmapNode.name)
+									
+									if slotIndex == 1 then
+									(
+										environmentMap  = coronaBitmapNode
+									)
+									-- Assign the Corona Bitmap to the scene materials or Material Editor
+					
+
+								)
 							)
 						)
 					)
 
-					if slotIndex <= meditMaterials.count then
+					if coronaBitmapNode != undefined then
 					(
-						meditMaterials[slotIndex] = materialToAssign
-						format "Assigned material to Material Editor slot: %\n" slotIndex
+						meditMaterials[slotIndex] = coronaBitmapNode
 						slotIndex += 1 -- Increment slot index for the next material
 					)
 					else
 					(
-						-- print "Ran out of Material Editor slots."
-						break -- Exit the loop if no more slots are available
+						messageBox "No HDRIs found in the selected folder." title:"Error"
 					)
+					
 					-- print ("Switching to Corona Renderer for material: " + mat.SubItems.Item[1].Text)
 				)
 
