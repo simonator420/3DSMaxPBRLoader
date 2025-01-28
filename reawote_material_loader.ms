@@ -138,7 +138,7 @@ rollout ReawotePBRLoader title
 		try (
 			d = (windows.getChildHWND 0 title)[1]
 			icon = dotnetobject "System.Drawing.Icon" ((getDir #usericons) +"\\reawote_icon.ico")
-			print(icon)
+			-- print(icon)
 			windows.SendMessage d 0x0080 0 icon.handle
 		) catch (
 			print "Error setting icon."
@@ -178,7 +178,7 @@ rollout ReawotePBRLoader title
 						local hdrFiles = getFiles (subfolder + "\\*.hdr")
 						if hdrFiles.count > 0 do
 						(
-							print("Valid HDRI folder found with .hdr file: " + folder)
+							-- print("Valid HDRI folder found with .hdr file: " + folder)
 							validHDRIFolderFound = true
 							validHDRIFolderExists = true
 							exit
@@ -203,8 +203,8 @@ rollout ReawotePBRLoader title
 			(
 				append allHDRIPaths selectedFolder
 				edtSelectedPath.text = selectedFolder
-				print("These are all the HDRI paths: " + (allHDRIPaths as string))
-				print("These are all the HDRI paths: " + (hdriPaths as string))
+				-- print("These are all the HDRI paths: " + (allHDRIPaths as string))
+				-- print("These are all the HDRI paths: " + (hdriPaths as string))
 				edtSelectedPath.enabled = true
 				btnLoadHDRI.enabled = true
 				btnBrowseHDRI.enabled = false
@@ -255,7 +255,7 @@ rollout ReawotePBRLoader title
 						local hdrFiles = getFiles (subfolder + "\\*.hdr")
 						if hdrFiles.count == 0 do
 						(
-							print("Folder ending found: " + folderName)
+							-- print("Folder ending found: " + folderName)
 							validSubfolderFound = true
 							validSubfolderExists = true
 							exit
@@ -344,7 +344,7 @@ rollout ReawotePBRLoader title
 						messageBox "Corona Renderer is not installed or not available." title:"Error"
 						return None
 					)
-					-- -- print out all subfolders of the actual material folder
+					-- print out all subfolders of the actual material folder
 					if subfolders.count > 0 then
 					(
 						-- print ("Subfolders in " + actualFolderPath + ":")
@@ -362,21 +362,17 @@ rollout ReawotePBRLoader title
 								if hdrFiles.count > 0 then
 								(
 									local hdrFilePath = hdrFiles[1] -- Use the first HDR file found
-									print ("Creating Corona Bitmap for: " + hdrFilePath)
 									
 									-- Create the Corona Bitmap node
 									coronaBitmapNode.filename = hdrFilePath
 									local coronaBitmapNode = createCoronaBitmapNode hdrFilePath
 									coronaBitmapNode.name = materialName
-									print ("HDRI added to scene materials: " + coronaBitmapNode.name)
 									
 									if slotIndex == 1 then
 									(
 										environmentMap  = coronaBitmapNode
-									)
-									-- Assign the Corona Bitmap to the scene materials or Material Editor
-					
-
+									) -- Assign the Corona Bitmap to the scene materials or Material Editor
+									
 								)
 							)
 						)
@@ -458,7 +454,6 @@ rollout ReawotePBRLoader title
 								local hdrFiles = getFiles (subfolder + "\\*.hdr")
 								if hdrFiles.count > 0 do
 								(
-									print("Valid HDRI folder found with .hdr file: " + hdrFiles[1])
 									local vrayBitmapNode = createVrayBitmapNode hdrFiles[1]
 									vrayBitmapNode.name = materialName
 									materialToAssign.map = vrayBitmapNode
@@ -607,8 +602,6 @@ rollout ReawotePBRLoader title
 											)
 
 											compositeMap.mapList[2] = aoMap
-											-- print(compositeLoaded)
-											-- print(map)
 										) 
 									)
 									else if map == "GLOSS" then
@@ -1039,7 +1032,6 @@ rollout ReawotePBRLoader title
 	on btnRefresh pressed do
 	(
 		lvItems.Items.Clear() -- Clear existing items in the ListView
-		print("Tohle jsou folderPaths: " + (folderPaths as string))
 	
 
 		-- Refresh Material Folders
@@ -1052,13 +1044,11 @@ rollout ReawotePBRLoader title
 
 				for folder in allSubFolders do
 				(
-					print("Checking folder: " + folder)
 					local folderName = filenameFromPath folder
 					local subfolders = getDirectories (folder + "\\*")
 
 					for subFolder in subfolders do
 					(
-						print("Checking Subfolder: " + subFolder)
 					
 						local parts = filterString subfolder "\\"
 						arrLength = parts.count
@@ -1069,7 +1059,6 @@ rollout ReawotePBRLoader title
 							local hdrFiles = getFiles (subfolder + "\\*.hdr")
 							if hdrFiles.count == 0 do
 							(
-								print("Valid material subfolder found: " + subFolder)
 								local parts = filterString folderName "_"
 								local matName = if parts.count >= 3 then
 									(parts[1] + "_" + parts[2] + "_" + parts[3])
@@ -1097,13 +1086,11 @@ rollout ReawotePBRLoader title
 
 				for folder in allSubFolders do
 				(
-					print("Checking folder: " + folder)
 					local folderName = filenameFromPath folder
 					local subfolders = getDirectories (folder + "\\*")
 
 					for subFolder in subfolders do
 					(
-						print("Checking Subfolder: " + subFolder)
 					
 						local parts = filterString subfolder "\\"
 						arrLength = parts.count
@@ -1114,7 +1101,6 @@ rollout ReawotePBRLoader title
 							local hdrFiles = getFiles (subfolder + "\\*.hdr")
 							if hdrFiles.count != 0 do
 							(
-								print("Valid material subfolder found: " + subFolder)
 								local parts = filterString folderName "_"
 								local matName = if parts.count >= 3 then
 									(parts[1] + "_" + parts[2] + "_" + parts[3])
@@ -1142,7 +1128,7 @@ rollout ReawotePBRLoader title
 
 				for subFolder in allSubFolders do
 				(
-					print("Checking Subfolder: " + subFolder)
+					-- print("Checking Subfolder: " + subFolder)
 					local folderName = filenameFromPath subFolder
 					local subfolderEndings = #("1K", "2K", "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K", "11K", "12K", "13K", "14K", "15K", "16K")
 					if findItem subfolderEndings folderName != 0 do
@@ -1150,7 +1136,7 @@ rollout ReawotePBRLoader title
 						local hdrFiles = getFiles (subFolder + "\\*.hdr")
 						if hdrFiles.count > 0 do
 						(
-							print("Valid HDRI subfolder found with .hdr file: " + subFolder)
+							-- print("Valid HDRI subfolder found with .hdr file: " + subFolder)
 							local parts = filterString folderName "_"
 							local hdrName = if parts.count >= 3 then
 								(parts[1] + "_" + parts[2] + "_" + parts[3])
@@ -1167,7 +1153,7 @@ rollout ReawotePBRLoader title
 			)
 		)
 
-		print "Refresh completed for materials and HDRIs."
+		-- print "Refresh completed for materials and HDRIs."
 	)
 
 
@@ -1199,7 +1185,7 @@ rollout ReawotePBRLoader title
 							local hdrFiles = getFiles (subfolder + "\\*.hdr")
 							if hdrFiles.count == 0 do
 							(
-								print("Folder ending found: " + folderName)
+								-- print("Folder ending found: " + folderName)
 								validSubfolderFound = true
 								validSubfolderExists = true
 								exit
@@ -1223,7 +1209,7 @@ rollout ReawotePBRLoader title
 				if validSubfolderExists do
 				(
 					append allFolderPaths additionalFolder
-					print "Material folders successfully added to the queue."
+					-- print "Material folders successfully added to the queue."
 				)
 			)
 
@@ -1273,7 +1259,7 @@ rollout ReawotePBRLoader title
 				if validHDRIFolderExists do
 				(
 					append allHDRIPaths additionalFolder
-					print "HDRI folders successfully added to the queue."
+					-- print "HDRI folders successfully added to the queue."
 				)
 			)
 		)
