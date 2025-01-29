@@ -338,12 +338,16 @@ rollout ReawotePBRLoader title
 				(
 					local coronaBitmapNode = CoronaBitmap ()
 					local materialName = mat.SubItems.Item[1].Text
-					renderers.current = Corona()
 					if not isKindOf renderers.current CoronaRenderer do
 					(
-						messageBox "Corona Renderer is not installed or not available." title:"Error"
-						return None
+						renderers.current = Corona()
+						if not isKindOf renderers.current CoronaRenderer then
+						(
+							messageBox "Corona Renderer is not installed or not available." title:"Error"
+							return None
+						)
 					)
+
 					-- print out all subfolders of the actual material folder
 					if subfolders.count > 0 then
 					(
@@ -410,21 +414,35 @@ rollout ReawotePBRLoader title
 						)
 					)
 
-					if vrayRenderers.count > 0 then (
-					-- Assume the first one is the highest
-					highestVersionRenderer = vrayRenderers[1]
+					if vrayRenderers.count > 0 then
+					(
+						-- Assume the first one is the highest
+						local highestVersionRenderer = vrayRenderers[1]
 
-					-- Iterate over the list to find the highest version
-					for rendererClass in vrayRenderers do (
-						if (getFilenameFile (rendererClass as string)) > (getFilenameFile (highestVersionRenderer as string)) then (
-							highestVersionRenderer = rendererClass
+						-- Iterate over the list to find the highest version
+						for rendererClass in vrayRenderers do 
+						(
+							if (getFilenameFile (rendererClass as string)) > (getFilenameFile (highestVersionRenderer as string)) then 
+							(
+								highestVersionRenderer = rendererClass
+							)
 						)
-					)
-						-- Set the highest version renderer as the current renderer
-					if not matchPattern (renderers.current as string) pattern:"V_Ray*" ignoreCase:true then (
-						renderers.current = highestVersionRenderer()
-					)
-					) else (
+
+						-- **Check Before Setting Renderer** (Prevents Unnecessary Reset)
+						if not isKindOf renderers.current highestVersionRenderer do 
+						(
+							renderers.current = highestVersionRenderer()
+							
+							-- **Error Handling in Case VRay Fails to Load**
+							if not matchPattern (renderers.current as string) pattern:"V_Ray*" ignoreCase:true then 
+							(
+								messageBox "VRay is not installed or not available." title:"Error"
+								return None
+							)
+						)
+					) 
+					else
+					(
 						messageBox "VRay is not installed or not available." title:"Error"
 						return None
 					)
@@ -495,12 +513,16 @@ rollout ReawotePBRLoader title
 				if selectedRenderer == "Corona" then
 				(
 					local materialName = mat.SubItems.Item[1].Text
-					renderers.current = Corona()
 					if not isKindOf renderers.current CoronaRenderer do
 					(
-						messageBox "Corona Renderer is not installed or not available." title:"Error"
-						return None
+						renderers.current = Corona()
+						if not isKindOf renderers.current CoronaRenderer then
+						(
+							messageBox "Corona Renderer is not installed or not available." title:"Error"
+							return None
+						)
 					)
+
 					local materialToAssign  = CoronaPhysicalMtl ()
 					materialToAssign.name = materialName
 					materialToAssign.roughnessMode = 1
@@ -738,21 +760,35 @@ rollout ReawotePBRLoader title
 						)
 					)
 
-					if vrayRenderers.count > 0 then (
-					-- Assume the first one is the highest
-					highestVersionRenderer = vrayRenderers[1]
+					if vrayRenderers.count > 0 then
+					(
+						-- Assume the first one is the highest
+						local highestVersionRenderer = vrayRenderers[1]
 
-					-- Iterate over the list to find the highest version
-					for rendererClass in vrayRenderers do (
-						if (getFilenameFile (rendererClass as string)) > (getFilenameFile (highestVersionRenderer as string)) then (
-							highestVersionRenderer = rendererClass
+						-- Iterate over the list to find the highest version
+						for rendererClass in vrayRenderers do 
+						(
+							if (getFilenameFile (rendererClass as string)) > (getFilenameFile (highestVersionRenderer as string)) then 
+							(
+								highestVersionRenderer = rendererClass
+							)
 						)
-					)
-						-- Set the highest version renderer as the current renderer
-					if not matchPattern (renderers.current as string) pattern:"V_Ray*" ignoreCase:true then (
-						renderers.current = highestVersionRenderer()
-					)
-					) else (
+
+						-- **Check Before Setting Renderer** (Prevents Unnecessary Reset)
+						if not isKindOf renderers.current highestVersionRenderer do 
+						(
+							renderers.current = highestVersionRenderer()
+							
+							-- **Error Handling in Case VRay Fails to Load**
+							if not matchPattern (renderers.current as string) pattern:"V_Ray*" ignoreCase:true then 
+							(
+								messageBox "VRay is not installed or not available." title:"Error"
+								return None
+							)
+						)
+					) 
+					else
+					(
 						messageBox "VRay is not installed or not available." title:"Error"
 						return None
 					)
