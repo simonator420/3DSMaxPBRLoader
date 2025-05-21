@@ -927,6 +927,7 @@ rollout ReawotePBRLoader title
 											nrmMap.color_space = 0 -- None
 											nrmMap.rgbColorSpace = 3 -- Raw
 											nrmMapNode.NormalMap = nrmMap
+											nrmMapNode.flip_green = true
 											materialToAssign.texmap_bump_multiplier = 100.0
 											materialToAssign.texmap_bump = nrmMapNode
 										)
@@ -942,6 +943,7 @@ rollout ReawotePBRLoader title
 											nrmMap.color_space = 0 -- None
 											nrmMap.rgbColorSpace = 3 -- Raw
 											nrmMapNode.NormalMap = nrmMap
+											nrmMapNode.flip_green = true
 											materialToAssign.texmap_bump_multiplier = 100.0
 											materialToAssign.texmap_bump = nrmMapNode
 										)
